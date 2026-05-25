@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM & Tarefas de Equipe</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 font-sans min-h-screen">
+
+    <div id="login-screen" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+            <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">CRM Equipe - Login</h2>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">E-mail</label>
+                    <input type="email" id="login-email" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50 border focus:outline-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input type="password" id="login-password" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 bg-gray-50 border focus:outline-blue-500">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition">Entrar</button>
+            </form>
+            <p class="text-xs text-center text-gray-500 mt-4">Nota: O administrador precisa cadastrar seu e-mail no painel do Supabase.</p>
+        </div>
+    </div>
+
+    <div id="app-screen" class="hidden flex flex-col min-h-screen">
+        <header class="bg-white shadow-sm p-4 flex justify-between items-center px-6">
+            <h1 class="text-xl font-bold text-gray-800">📊 CRM & Tarefas da Equipe</h1>
+            <div class="flex items-center gap-4">
+                <span id="user-display" class="text-sm text-gray-600 font-medium"></span>
+                <button id="logout-btn" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded hover:bg-red-200 transition">Sair</button>
+            </div>
+        </header>
+
+        <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+            
+            <section class="bg-white p-4 rounded-lg shadow-sm">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">Nova Demanda / Cliente</h3>
+                <form id="task-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500">Cliente / Empresa</label>
+                        <input type="text" id="task-client" required class="mt-1 block w-full rounded border p-2 bg-gray-50 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500">Tarefa / O que fazer?</label>
+                        <input type="text" id="task-desc" required class="mt-1 block w-full rounded border p-2 bg-gray-50 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500">Responsável</label>
+                        <input type="text" id="task-assignee" required class="mt-1 block w-full rounded border p-2 bg-gray-50 text-sm" placeholder="Nome do membro">
+                    </div>
+                    <button type="submit" class="bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700 font-medium transition">Adicionar à Lista</button>
+                </form>
+            </section>
+
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-200/60 p-4 rounded-lg min-h-[400px]">
+                    <h4 class="font-bold text-gray-700 mb-4 flex justify-between">🔴 Pendente <span id="count-todo" class="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full">0</span></h4>
+                    <div id="col-todo" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-gray-200/60 p-4 rounded-lg min-h-[400px]">
+                    <h4 class="font-bold text-gray-700 mb-4 flex justify-between">🟡 Em Andamento <span id="count-doing" class="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full">0</span></h4>
+                    <div id="col-doing" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-gray-200/60 p-4 rounded-lg min-h-[400px]">
+                    <h4 class="font-bold text-gray-700 mb-4 flex justify-between">🟢 Concluído <span id="count-done" class="bg-gray-300 text-gray-700 text-xs px-2 py-0.5 rounded-full">0</span></h4>
+                    <div id="col-done" class="space-y-3"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Configurações do Supabase (Substitua pelas suas chaves após criar a conta gratuita)
+        const SUPABASE_URL = "SUA_SUPABASE_URL_AQUI";
+        const SUPABASE_ANON_KEY = "SUA_SUPABASE_ANON_KEY_AQUI";
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Elementos da Tela
+        const loginScreen = document.getElementById('login-screen');
+        const appScreen = document.getElementById('app-screen');
+        const loginForm = document.getElementById('login-form');
+        const taskForm = document.getElementById('task-form');
+        const userDisplay = document.getElementById('user-display');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Monitorar estado de Login do Usuário
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                loginScreen.classList.add('hidden');
+                appScreen.classList.remove('hidden');
+                userDisplay.innerText = session.user.email;
+                carregarTarefas();
+            } else {
+                loginScreen.classList.remove('hidden');
+                appScreen.classList.add('hidden');
+            }
+        });
+
+        // Evento de Login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) alert("Erro ao entrar: " + error.message);
+        });
+
+        // Evento de Logout
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+        });
+
+        // Criar Nova Tarefa no Banco de Dados
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cliente = document.getElementById('task-client').value;
+            const descricao = document.getElementById('task-desc').value;
+            const responsavel = document.getElementById('task-assignee').value;
+
+            const { error } = await supabase.from('tarefas').insert([
+                { cliente, descricao, responsavel, status: 'todo' }
+            ]);
+
+            if (error) {
+                alert("Erro ao salvar tarefa: " + error.message);
+            } else {
+                taskForm.reset();
+                carregarTarefas(); // Atualiza a tela
+            }
+        });
+
+        // Alterar Status da Tarefa (Avançar no Kanban)
+        async function moverTarefa(id, novoStatus) {
+            const { error } = await supabase.from('tarefas').update({ status: novoStatus }).eq('id', id);
+            if (error) alert("Erro ao atualizar status: " + error.message);
+            else carregarTarefas();
+        }
+
+        // Deletar Tarefa
+        async function deletarTarefa(id) {
+            if(confirm("Deseja apagar esta tarefa?")) {
+                const { error } = await supabase.from('tarefas').delete().eq('id', id);
+                if (error) alert("Erro ao deletar: " + error.message);
+                else carregarTarefas();
+            }
+        }
+
+        // Buscar Tarefas do Banco e Renderizar na Tela
+        async function carregarTarefas() {
+            const { data: tarefas, error } = await supabase.from('tarefas').select('*').order('created_at', { ascending: true });
+            
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            // Limpar colunas
+            const cols = { todo: document.getElementById('col-todo'), doing: document.getElementById('col-doing'), done: document.getElementById('col-done') };
+            Object.values(cols).forEach(col => col.innerHTML = '');
+            
+            let contadores = { todo: 0, doing: 0, done: 0 };
+
+            // Renderizar cartões
+            tarefas.forEach(t => {
+                contadores[t.status]++;
+                
+                let botoesAcao = '';
+                if (t.status === 'todo') botoesAcao = `<button onclick="moverTarefa(${t.id}, 'doing')" class="text-xs bg-yellow-500 text-white px-2 py-1 rounded">👉 Iniciar</button>`;
+                if (t.status === 'doing') botoesAcao = `<button onclick="moverTarefa(${t.id}, 'done')" class="text-xs bg-green-500 text-white px-2 py-1 rounded">👉 Concluir</button>`;
+
+                const card = `
+                    <div class="bg-white p-4 rounded shadow-sm border-l-4 ${t.status === 'todo' ? 'border-red-400' : t.status === 'doing' ? 'border-yellow-400' : 'border-green-400'}">
+                        <div class="flex justify-between items-start mb-2">
+                            <h5 class="font-bold text-sm text-gray-800">${t.cliente}</h5>
+                            <button onclick="deletarTarefa(${t.id})" class="text-gray-400 hover:text-red-500 text-xs">✕</button>
+                        </div>
+                        <p class="text-xs text-gray-600 mb-3">${t.descricao}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium">👤 ${t.responsavel}</span>
+                            ${botoesAcao}
+                        </div>
+                    </div>
+                `;
+                cols[t.status].innerHTML += card;
+            });
+
+            // Atualizar contadores visuais
+            document.getElementById('count-todo').innerText = contadores.todo;
+            document.getElementById('count-doing').innerText = contadores.doing;
+            document.getElementById('count-done').innerText = contadores.done;
+        }
+    </script>
+</body>
+</html>
