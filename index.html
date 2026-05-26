@@ -72,7 +72,7 @@
                     <button onclick="toggleSidebar()" class="md:hidden text-white/70 hover:text-white cursor-pointer font-bold">✕</button>
                 </div>
                 <nav class="p-4 space-y-1">
-                    <button onclick="switchTab('home')" id="btn-tab-home" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm">
+                    <button onclick="switchTab('home')" id="btn-tab-home" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white">
                         <span>🏠</span> Página Inicial
                     </button>
                     <button onclick="switchTab('tasks')" id="btn-tab-tasks" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
@@ -131,7 +131,7 @@
                                 </tr>
                             </thead>
                             <tbody id="dash-deadlines-table" class="divide-y divide-gray-100 text-gray-600">
-                                </tbody>
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -300,13 +300,13 @@
         let fullCalendarInstance = null;
         let chartInstance = null;
         let editingTaskId = null;
+        let realtimeChannel = null; // Guardará a inscrição em tempo real
 
-        // CONTROLE DO MENU MOBILE (Novo)
+        // CONTROLE DO MENU MOBILE
         function toggleSidebar() {
             const sidebar = document.getElementById('main-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             
-            // Alterna a classe de translação (gaveta entra/sai)
             sidebar.classList.toggle('-translate-x-full');
             
             if(sidebar.classList.contains('-translate-x-full')) {
@@ -323,7 +323,7 @@
                 if (novaSenha) {
                     crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => {
                         if (error) alert("Erro ao atualizar senha: " + error.message);
-                        else alert("Senha atualizada com sucesso! Por favor, faça o login com a nova senha.");
+                        else alert("Senha updated com sucesso! Faça login com a nova senha.");
                     });
                 }
             }
@@ -335,11 +335,27 @@
                 app.classList.add('flex');
                 setTimeout(() => app.classList.remove('opacity-0'), 50);
                 document.getElementById('user-display').innerText = `CONECTADO: ${session.user.email}`;
+                
+                // ATIVAÇÃO DO SUPABASE REALTIME MOTOR COORDENADO
+                if (!realtimeChannel) {
+                    realtimeChannel = crmBanco.channel('tarefas-realtime-monitor')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'tarefas' }, (payload) => {
+                            sincronizarDados(); // Dispara atualização de telas instantaneamente
+                        })
+                        .subscribe();
+                }
+
                 sincronizarDados();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 app.classList.add('hidden', 'opacity-0');
                 app.classList.remove('flex');
+                
+                // Desliga o ouvinte caso deslogue
+                if (realtimeChannel) {
+                    crmBanco.removeChannel(realtimeChannel);
+                    realtimeChannel = null;
+                }
             }
         });
 
@@ -355,12 +371,12 @@
             if (error) alert("Erro: " + error.message);
         });
 
-        // RECUPERAÇÃO DE SENHA (ESQUECI MINHA SENHA)
+        // RECUPERAÇÃO DE SENHA
         document.getElementById('btn-esqueci-senha').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim();
             
             if (!email) {
-                alert("Por favor, digite o seu e-mail no campo acima antes de clicar em 'Esqueci minha senha'.");
+                alert("Por favor, digite o seu e-mail no campo antes de clicar em 'Esqueci minha senha'.");
                 return;
             }
 
@@ -371,7 +387,7 @@
             if (error) {
                 alert("Erro ao solicitar redefinição: " + error.message);
             } else {
-                alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada ou aba de spam.");
+                alert("E-mail de redefinição enviado com sucesso!");
             }
         });
 
@@ -388,7 +404,6 @@
             targetTab.classList.remove('hidden');
             document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white";
             
-            // Fecha o menu no Mobile automaticamente após clicar numa aba
             if(window.innerWidth < 768) { toggleSidebar(); }
 
             if (tabName === 'calendar' && fullCalendarInstance) setTimeout(() => fullCalendarInstance.render(), 50);
@@ -405,24 +420,22 @@
 
             const { error } = await crmBanco.from('tarefas').insert([{ cliente, descricao, responsavel, data_limite, status: 'todo' }]);
             if (error) alert(error.message);
-            else { document.getElementById('task-form').reset(); sincronizarDados(); }
+            else { document.getElementById('task-form').reset(); }
         });
 
         // Atualizar Status
         async function moverTarefa(id, novoStatus) {
             await crmBanco.from('tarefas').update({ status: novoStatus }).eq('id', id);
-            sincronizarDados();
         }
 
         // Deletar Registro
         async function deletarTarefa(id) {
             if(confirm("Deseja apagar permanentemente?")) {
                 await crmBanco.from('tarefas').delete().eq('id', id);
-                sincronizarDados();
             }
         }
 
-        // --- SISTEMA INTERNO DE EDIÇÃO ---
+        // SISTEMA INTERNO DE EDIÇÃO
         function abrirModalEdicao(id) {
             const tarefa = todasAtividades.find(t => t.id === id);
             if (!tarefa) return;
@@ -460,11 +473,10 @@
             const { error } = await crmBanco.from('tarefas').update({ cliente, descricao, responsavel, data_limite }).eq('id', editingTaskId);
             
             if (error) alert("Erro na atualização: " + error.message);
-            else { fecharModalEdicao(); sincronizarDados(); }
+            else { fecharModalEdicao(); }
         });
-        // ----------------------------------------
 
-        // Sincronização
+        // Sincronização Geral de Informações
         async function sincronizarDados() {
             const { data, error } = await crmBanco.from('tarefas').select('*').order('data_limite', { ascending: true });
             if (error) return;
@@ -476,72 +488,87 @@
             renderizarCalendario();
         }
 
-        // Render: Home
+        // --- SISTEMAS DE RENDERIZAÇÃO COMPLETA DAS TELAS ---
+
         function renderizarPaginaInicial() {
-            let cnt = { todo: 0, doing: 0, done: 0 };
-            todasAtividades.forEach(t => cnt[t.status]++);
+            const total = todasAtividades.length;
+            const todo = todasAtividades.filter(t => t.status === 'todo').length;
+            const doing = todasAtividades.filter(t => t.status === 'doing').length;
+            const done = todasAtividades.filter(t => t.status === 'done').length;
 
-            document.getElementById('dash-total').innerText = todasAtividades.length;
-            document.getElementById('dash-todo').innerText = cnt.todo;
-            document.getElementById('dash-doing').innerText = cnt.doing;
-            document.getElementById('dash-done').innerText = cnt.done;
+            document.getElementById('dash-total').innerText = total;
+            document.getElementById('dash-todo').innerText = todo;
+            document.getElementById('dash-doing').innerText = doing;
+            document.getElementById('dash-done').innerText = done;
 
+            // Alertas de Prazos Próximos (Tarefas não concluídas)
             const tbody = document.getElementById('dash-deadlines-table');
             tbody.innerHTML = '';
             
-            todasAtividades.filter(t => t.status !== 'done').slice(0, 5).forEach(t => {
-                const badge = t.status === 'todo' ? '🔴 Pendente' : '🟡 Em Andamento';
-                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
-                        <td class="p-3 font-medium text-gray-800">${t.cliente}</td>
-                        <td class="p-3 text-gray-500">${t.descricao}</td>
-                        <td class="p-3 text-gray-500">👤 ${t.responsavel}</td>
-                        <td class="p-3 font-mono font-medium text-red-500">${dt}</td>
-                        <td class="p-3 text-[10px] whitespace-nowrap">${badge}</td>
-                    </tr>`;
+            const urgentes = todasAtividades.filter(t => t.status !== 'done').slice(0, 5);
+            
+            if (urgentes.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-400">Nenhum prazo pendente crítico.</td></tr>`;
+                return;
+            }
+
+            urgentes.forEach(t => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/80 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-gray-900">${t.cliente}</td>
+                    <td class="p-3">${t.descricao}</td>
+                    <td class="p-3">${t.responsavel}</td>
+                    <td class="p-3 font-mono text-red-500 font-medium">${t.data_limite || '---'}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${t.status === 'todo' ? 'bg-red-50 text-red-600' : 'bg-yellow-50 text-yellow-600'}">
+                            ${t.status === 'todo' ? 'Pendente' : 'Em Andamento'}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
         }
 
-        // Render: Kanban
         function renderizarKanban() {
-            const cols = { todo: document.getElementById('col-todo'), doing: document.getElementById('col-doing'), done: document.getElementById('col-done') };
-            Object.values(cols).forEach(col => col.innerHTML = '');
-            let counts = { todo: 0, doing: 0, done: 0 };
+            const cols = {
+                todo: document.getElementById('col-todo'),
+                doing: document.getElementById('col-doing'),
+                done: document.getElementById('col-done')
+            };
+
+            // Limpa as colunas
+            Object.values(cols).forEach(col => { if(col) col.innerHTML = ''; });
+
+            const counts = { todo: 0, doing: 0, done: 0 };
 
             todasAtividades.forEach(t => {
+                if (!cols[t.status]) return;
                 counts[t.status]++;
-                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
-                
-                let controlButtons = '';
-                if (t.status === 'todo') {
-                    controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer w-full md:w-auto mt-2 md:mt-0">Iniciar 👉</button></div>`;
-                } else if (t.status === 'doing') {
-                    controlButtons = `
-                        <div class="w-full flex flex-col md:flex-row justify-between items-center gap-2 mt-2 md:mt-0">
-                            <button onclick="moverTarefa(${t.id}, 'todo')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-red-500 px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer">👈 Retornar</button>
-                            <button onclick="moverTarefa(${t.id}, 'done')" class="text-[10px] bg-green-600 text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-green-700 w-full md:w-auto transition-colors cursor-pointer">Concluir ✔️</button>
-                        </div>`;
-                } else if (t.status === 'done') {
-                    controlButtons = `<div class="w-full flex justify-start"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-[#533ABF] px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer mt-2 md:mt-0">↺ Reabrir Demanda</button></div>`;
-                }
 
-                cols[t.status].innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md space-y-2.5">
-                        <div class="flex justify-between items-start">
-                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[200px] md:max-w-[140px]">${t.cliente}</h5>
-                            <div class="flex gap-3 md:gap-2">
-                                <button onclick="abrirModalEdicao(${t.id})" class="text-gray-400 hover:text-[#533ABF] text-[12px] md:text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
-                                <button onclick="deletarTarefa(${t.id})" class="text-gray-400 hover:text-red-500 text-[12px] md:text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
-                            </div>
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-xl shadow-xs border border-gray-100 space-y-3 relative group hover:shadow-sm transition-all tab-animate";
+                card.innerHTML = `
+                    <div class="flex justify-between items-start gap-2">
+                        <div>
+                            <h5 class="font-bold text-xs text-gray-900">${t.cliente}</h5>
+                            <p class="text-xs text-gray-600 mt-0.5">${t.descricao}</p>
                         </div>
-                        <p class="text-[11px] text-gray-500 line-clamp-2">${t.descricao}</p>
-                        <div class="text-[9px] text-gray-400 font-medium border-b border-gray-50 pb-2">Prazo: <span class="font-mono text-gray-600">${dt}</span></div>
-                        <div class="pt-1 flex flex-col gap-2">
-                            <div class="text-[10px] md:text-[9px] text-gray-500">👤 ${t.responsavel}</div>
-                            ${controlButtons}
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="abrirModalEdicao('${t.id}')" class="text-gray-400 hover:text-[#533ABF] p-0.5 text-xs cursor-pointer">✏️</button>
+                            <button onclick="deletarTarefa('${t.id}')" class="text-gray-400 hover:text-red-600 p-0.5 text-xs cursor-pointer">🗑️</button>
                         </div>
-                    </div>`;
+                    </div>
+                    <div class="flex items-center justify-between pt-2 border-t border-gray-50 text-[11px]">
+                        <span class="text-gray-500 font-medium">👤 ${t.responsavel}</span>
+                        <span class="text-gray-400 font-mono">📅 ${t.data_limite || '---'}</span>
+                    </div>
+                    <div class="flex justify-end gap-1.5 pt-1">
+                        ${t.status !== 'todo' ? `<button onclick="moverTarefa('${t.id}', '${t.status === 'done' ? 'doing' : 'todo'}')" class="text-[10px] bg-gray-50 hover:bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium cursor-pointer">◀</button>` : ''}
+                        ${t.status !== 'done' ? `<button onclick="moverTarefa('${t.id}', '${t.status === 'todo' ? 'doing' : 'done'}')" class="text-[10px] bg-gray-50 hover:bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium cursor-pointer">▶</button>` : ''}
+                    </div>
+                `;
+                cols[t.status].appendChild(card);
             });
 
             document.getElementById('count-todo').innerText = counts.todo;
@@ -549,127 +576,137 @@
             document.getElementById('count-done').innerText = counts.done;
         }
 
-        // Relatórios Dinâmicos
-        ['filter-start', 'filter-end', 'filter-assignee', 'filter-status'].forEach(id => {
-            document.getElementById(id).addEventListener('input', processarFiltrosERelatorios);
-        });
-
         function processarFiltrosERelatorios() {
             const start = document.getElementById('filter-start').value;
             const end = document.getElementById('filter-end').value;
             const assignee = document.getElementById('filter-assignee').value.toLowerCase().trim();
             const status = document.getElementById('filter-status').value;
 
-            let filtered = todasAtividades.filter(t => {
+            const filtrados = todasAtividades.filter(t => {
                 if (start && t.data_limite && t.data_limite < start) return false;
                 if (end && t.data_limite && t.data_limite > end) return false;
-                if (assignee && !t.responsavel.toLowerCase().includes(assignee)) return false;
+                if (assignee && (!t.responsavel || !t.responsavel.toLowerCase().includes(assignee))) return false;
                 if (status !== 'all' && t.status !== status) return false;
                 return true;
             });
 
-            const list = document.getElementById('summary-list');
-            list.innerHTML = filtered.length === 0 ? '<p class="text-gray-400 text-xs italic py-4 text-center">Nenhum registro correspondente.</p>' : '';
-            
-            let chData = { todo: 0, doing: 0, done: 0 };
+            const listContainer = document.getElementById('summary-list');
+            listContainer.innerHTML = filtrados.length === 0 ? '<p class="text-xs text-gray-400 p-4 text-center">Nenhum registro encontrado para os filtros.</p>' : '';
 
-            filtered.forEach(t => {
-                chData[t.status]++;
-                const badge = t.status === 'todo' ? 'bg-red-50 text-red-600' : t.status === 'doing' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600';
-                const txt = t.status === 'todo' ? 'Pendente' : t.status === 'doing' ? 'Em Andamento' : 'Concluído';
-                list.innerHTML += `
-                    <div class="py-3 flex flex-col md:flex-row md:justify-between md:items-center text-xs gap-2">
-                        <div>
-                            <p class="font-medium text-gray-800">${t.cliente} <span class="text-gray-400 font-normal hidden md:inline">- ${t.descricao}</span></p>
-                            <p class="text-[10px] text-gray-400 mt-0.5">Responsável: ${t.responsavel}</p>
-                        </div>
-                        <span class="px-2 py-1 md:py-0.5 rounded-md font-medium text-[10px] md:text-[9px] w-max ${badge}">${txt}</span>
-                    </div>`;
+            let counts = { todo: 0, doing: 0, done: 0 };
+
+            filtrados.forEach(t => {
+                counts[t.status]++;
+                const item = document.createElement('div');
+                item.className = "py-3 flex justify-between items-center text-xs";
+                
+                let badge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-50 text-red-600">Pendente</span>`;
+                if(t.status === 'doing') badge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-yellow-50 text-yellow-600">Em Andamento</span>`;
+                if(t.status === 'done') badge = `<span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-green-50 text-green-600">Concluído</span>`;
+
+                item.innerHTML = `
+                    <div>
+                        <p class="font-semibold text-gray-800">${t.cliente} <span class="font-normal text-gray-500">(${t.descricao})</span></p>
+                        <p class="text-[10px] text-gray-400 mt-0.5">Resp: ${t.responsavel} | Limite: ${t.data_limite || '---'}</p>
+                    </div>
+                    <div>${badge}</div>
+                `;
+                listContainer.appendChild(item);
             });
 
-            if (chartInstance) chartInstance.destroy();
+            // GERAÇÃO / ATUALIZAÇÃO DO GRÁFICO CHART.JS
             const ctx = document.getElementById('productivityChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Pendente', 'Andamento', 'Concluído'],
+                    labels: ['Pendente', 'Em Andamento', 'Concluído'],
                     datasets: [{
-                        data: [chData.todo, chData.doing, chData.done],
+                        data: [counts.todo, counts.doing, counts.done],
                         backgroundColor: ['#EF4444', '#F59E0B', '#10B981'],
                         borderWidth: 0
                     }]
                 },
-                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    cutout: '75%'
+                }
             });
         }
 
-        // Calendário Integrado
-        document.getElementById('calendar-filter-user').addEventListener('input', renderizarCalendario);
+        // Vincular Ouvintes de Inputs para os Filtros Reativos
+        ['filter-start', 'filter-end', 'filter-assignee', 'filter-status'].forEach(id => {
+            document.getElementById(id).addEventListener('input', processarFiltrosERelatorios);
+            document.getElementById(id).addEventListener('change', processarFiltrosERelatorios);
+        });
 
         function renderizarCalendario() {
-            const filterUser = document.getElementById('calendar-filter-user').value.toLowerCase().trim();
             const calendarEl = document.getElementById('calendar-widget');
-            
-            const eventosMap = todasAtividades
-                .filter(t => t.data_limite && (!filterUser || t.responsavel.toLowerCase().includes(filterUser)))
-                .map(t => ({
-                    id: t.id,
-                    title: `[${t.cliente}] ${t.descricao}`,
-                    start: t.data_limite,
-                    backgroundColor: t.status === 'todo' ? '#EF4444' : t.status === 'doing' ? '#F59E0B' : '#10B981',
-                    borderColor: 'transparent',
-                    extendedProps: { ...t }
-                }));
+            if (!calendarEl) return;
 
-            if (fullCalendarInstance) fullCalendarInstance.destroy();
+            const userFilter = document.getElementById('calendar-filter-user').value.toLowerCase().trim();
 
-            fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
-                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth', // Usa lista no mobile para não quebrar
-                locale: 'pt-br',
-                headerToolbar: { 
-                    left: 'prev,next', 
-                    center: 'title', 
-                    right: window.innerWidth < 768 ? '' : 'dayGridMonth,listMonth' 
-                },
-                buttonText: { today: 'Hoje', list: 'Lista', month: 'Mês' },
-                events: eventosMap,
-                eventClick: function(info) { abrirDetalhesNoDrawer(info.event.extendedProps); }
-            });
-            fullCalendarInstance.render();
+            const eventos Mapeados = todasAtividades
+                .filter(t => {
+                    if (!t.data_limite) return false;
+                    if (userFilter && (!t.responsavel || !t.responsavel.toLowerCase().includes(userFilter))) return false;
+                    return true;
+                })
+                .map(t => {
+                    let cor = '#EF4444';
+                    if(t.status === 'doing') cor = '#F59E0B';
+                    if(t.status === 'done') cor = '#10B981';
+
+                    return {
+                        id: t.id,
+                        title: `${t.cliente}: ${t.descricao}`,
+                        start: t.data_limite,
+                        backgroundColor: cor,
+                        borderColor: cor,
+                        extendedProps: t
+                    };
+                });
+
+            if (!fullCalendarInstance) {
+                fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'pt-br',
+                    headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                    buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
+                    events: eventosMapeados,
+                    eventClick: function(info) {
+                        mostrarDetalhesDrawer(info.event.extendedProps);
+                    }
+                });
+                fullCalendarInstance.render();
+            } else {
+                fullCalendarInstance.removeAllEvents();
+                fullCalendarInstance.addEventSource(eventosMapeados);
+            }
         }
 
-        function toggleDrawer(open) {
-            const drawer = document.getElementById('calendar-drawer');
-            if (open) drawer.classList.remove('translate-x-full');
-            else drawer.classList.add('translate-x-full');
-        }
+        document.getElementById('calendar-filter-user').addEventListener('input', renderizarCalendario);
 
-        function abrirDetalhesNoDrawer(task) {
-            document.getElementById('drawer-client').innerText = task.cliente;
-            document.getElementById('drawer-desc').innerText = task.descricao;
-            document.getElementById('drawer-assignee').innerText = `👤 ${task.responsavel}`;
-            document.getElementById('drawer-deadline').innerText = task.data_limite ? task.data_limite.split('-').reverse().join('/') : 'Não definida';
+        function mostrarDetalhesDrawer(t) {
+            document.getElementById('drawer-client').innerText = t.cliente;
+            document.getElementById('drawer-desc').innerText = t.descricao;
+            document.getElementById('drawer-assignee').innerText = t.responsavel;
+            document.getElementById('drawer-deadline').innerText = t.data_limite || '---';
             
             const statusEl = document.getElementById('drawer-status');
-            if (task.status === 'todo') {
-                statusEl.innerText = '🔴 Pendente';
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700';
-            } else if (task.status === 'doing') {
-                statusEl.innerText = '🟡 Em Andamento';
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700';
-            } else {
-                statusEl.innerText = '🟢 Concluído';
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-700';
-            }
+            statusEl.innerText = t.status === 'todo' ? '🔴 PENDENTE' : t.status === 'doing' ? '🟡 EM ANDAMENTO' : '🟢 CONCLUÍDO';
+            statusEl.className = `inline-block mt-1 px-3 py-1 rounded-full font-bold text-[10px] ${t.status === 'todo' ? 'bg-red-50 text-red-600' : t.status === 'doing' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600'}`;
+            
             toggleDrawer(true);
         }
 
-        // Re-renderiza o calendário ao redimensionar a tela para ajustar de Grid para Lista
-        window.addEventListener('resize', () => {
-            if(!document.getElementById('tab-calendar').classList.contains('hidden')) {
-                renderizarCalendario();
-            }
-        });
+        function toggleDrawer(isOpen) {
+            const drawer = document.getElementById('calendar-drawer');
+            if (isOpen) drawer.classList.remove('translate-x-full');
+            else drawer.classList.add('translate-x-full');
+        }
     </script>
 </body>
 </html>
