@@ -8,160 +8,183 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+    
+    <style>
+        /* Animações fluidas de Transição de Telas */
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-animate { animation: tabFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        
+        /* Customização sutil de scrollbars para o visual minimalista */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
+    </style>
 </head>
-<body class="bg-gray-50 font-sans min-h-screen antialiased text-gray-800">
+<body class="bg-[#FEFEFE] font-sans min-h-screen antialiased text-gray-800 flex flex-col justify-between">
 
-    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-[#533ABF]">
-        <div class="bg-[#FEFEFE] p-8 rounded-2xl shadow-xl w-full max-w-md border-t-8 border-[#E424C8]">
+    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-[#533ABF] transition-all duration-500">
+        <div class="bg-[#FEFEFE] p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-4 border-[#E424C8] transform transition-transform duration-500 hover:scale-[1.01]">
             <div class="flex justify-center mb-6">
-                <img src="logo.png" alt="PrimaPay" class="h-12 object-contain" onerror="this.src='https://placehold.co/200x60?text=PrimaPay'">
+                <img src="logo.png" alt="PrimaPay" class="h-10 object-contain" onerror="this.src='https://placehold.co/200x60/533ABF/ffffff?text=PrimaPay'">
             </div>
-            <h2 class="text-xl font-bold text-center text-gray-700 mb-6">Acesso ao CRM</h2>
+            <h2 class="text-lg font-medium text-center text-gray-500 mb-6 tracking-wide">Acesso Restrito CRM</h2>
             <form id="login-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">E-mail</label>
-                    <input type="email" id="login-email" required class="mt-1 block w-full rounded-lg border border-gray-300 p-2.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#533ABF]">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">E-mail</label>
+                    <input type="email" id="login-email" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-3 bg-gray-50/50 focus:outline-none focus:border-[#533ABF] transition-colors text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">Senha</label>
-                    <input type="password" id="login-password" required class="mt-1 block w-full rounded-lg border border-gray-300 p-2.5 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#533ABF]">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Senha</label>
+                    <input type="password" id="login-password" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-3 bg-gray-50/50 focus:outline-none focus:border-[#533ABF] transition-colors text-sm">
                 </div>
-                <button type="submit" class="w-full bg-[#533ABF] text-[#FEFEFE] p-3 rounded-lg hover:bg-[#422e99] transition font-semibold shadow-md cursor-pointer">Entrar</button>
+                <button type="submit" class="w-full bg-[#533ABF] text-[#FEFEFE] p-3 rounded-xl hover:bg-[#422e99] active:scale-[0.99] transition-all font-semibold shadow-md cursor-pointer mt-2">Entrar</button>
             </form>
         </div>
     </div>
 
-    <div id="app-screen" class="hidden flex min-h-screen">
+    <div id="app-screen" class="hidden flex min-h-screen transition-opacity duration-500 opacity-0">
         
-        <aside class="w-64 bg-[#533ABF] text-[#FEFEFE] flex flex-col justify-between shadow-xl shrink-0">
+        <aside class="w-64 bg-[#533ABF] text-[#FEFEFE] flex flex-col justify-between shadow-xl shrink-0 transition-all duration-300">
             <div>
-                <div class="p-6 border-b border-white/10 flex justify-center">
-                    <img src="logo.png" alt="PrimaPay" class="h-10 object-contain" onerror="this.src='https://placehold.co/150x50/533ABF/ffffff?text=PrimaPay'">
+                <div class="p-6 border-b border-white/5 flex justify-center">
+                    <img src="logo.png" alt="PrimaPay" class="h-8 object-contain" onerror="this.src='https://placehold.co/150x50/533ABF/ffffff?text=PrimaPay'">
                 </div>
-                <nav class="p-4 space-y-2">
-                    <button onclick="switchTab('home')" id="btn-tab-home" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition cursor-pointer text-left bg-[#E424C8]">
-                        🏠 Página Inicial
+                <nav class="p-4 space-y-1">
+                    <button onclick="switchTab('home')" id="btn-tab-home" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm">
+                        <span>🏠</span> Página Inicial
                     </button>
-                    <button onclick="switchTab('tasks')" id="btn-tab-tasks" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition cursor-pointer text-left hover:bg-white/10">
-                        📋 Tarefas
+                    <button onclick="switchTab('tasks')" id="btn-tab-tasks" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
+                        <span>📋</span> Tarefas
                     </button>
-                    <button onclick="switchTab('summary')" id="btn-tab-summary" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition cursor-pointer text-left hover:bg-white/10">
-                        📊 Resumo de Dados
+                    <button onclick="switchTab('summary')" id="btn-tab-summary" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
+                        <span>📊</span> Resumo de Dados
                     </button>
-                    <button onclick="switchTab('calendar')" id="btn-tab-calendar" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition cursor-pointer text-left hover:bg-white/10">
-                        📅 Calendário
+                    <button onclick="switchTab('calendar')" id="btn-tab-calendar" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
+                        <span>📅</span> Calendário
                     </button>
                 </nav>
             </div>
-            <div class="p-4 border-t border-white/10 bg-black/10 flex flex-col gap-2">
-                <span id="user-display" class="text-xs opacity-80 truncate font-mono"></span>
-                <button id="logout-btn" class="w-full text-center bg-red-500/20 text-red-300 hover:bg-red-500/40 py-2 rounded-lg text-xs font-semibold transition cursor-pointer">Sair do CRM</button>
+            <div class="p-4 border-t border-white/5 bg-black/5 flex flex-col gap-2">
+                <span id="user-display" class="text-[11px] opacity-60 truncate font-mono tracking-tight"></span>
+                <button id="logout-btn" class="w-full text-center bg-red-500/10 hover:bg-red-500/20 text-red-200 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer">Sair do Sistema</button>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col overflow-y-auto max-h-screen">
+        <main class="flex-1 flex flex-col overflow-y-auto max-h-screen bg-gray-50/50">
             
-            <div id="tab-home" class="p-6 space-y-6">
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">Visão Geral do CRM</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-[#533ABF]">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total de Demandas</p>
-                        <p id="dash-total" class="text-3xl font-black text-gray-800 mt-1">0</p>
+            <div id="tab-home" class="p-8 space-y-8 tab-animate">
+                <div class="flex flex-col gap-1">
+                    <h2 class="text-xl font-bold text-gray-900">Visão Geral do CRM</h2>
+                    <p class="text-xs text-gray-400">Métricas consolidadas e próximos marcos operacionais da PrimaPay.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Demandas</p>
+                        <p id="dash-total" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-red-500">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">🔴 Pendentes</p>
-                        <p id="dash-todo" class="text-3xl font-black text-gray-800 mt-1">0</p>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-red-400">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🔴 Pendentes</p>
+                        <p id="dash-todo" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-500">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">🟡 Em Andamento</p>
-                        <p id="dash-doing" class="text-3xl font-black text-gray-800 mt-1">0</p>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-yellow-400">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🟡 Em Andamento</p>
+                        <p id="dash-doing" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">🟢 Concluídas</p>
-                        <p id="dash-done" class="text-3xl font-black text-gray-800 mt-1">0</p>
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-green-400">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🟢 Concluídas</p>
+                        <p id="dash-done" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm">
-                    <h3 class="font-bold text-gray-700 mb-4">⏰ Alertas de Prazos Próximos</h3>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="font-medium text-sm text-gray-700 mb-4 tracking-wide">⏰ Alertas de Prazos Próximos</h3>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                        <table class="w-full text-xs text-left">
+                            <thead class="bg-gray-50 text-gray-400 uppercase text-[10px] tracking-wider">
                                 <tr>
-                                    <th class="p-3">Cliente</th>
-                                    <th class="p-3">Atividade</th>
-                                    <th class="p-3">Responsável</th>
-                                    <th class="p-3">Prazo Limite</th>
-                                    <th class="p-3">Status</th>
+                                    <th class="p-3 font-medium">Cliente</th>
+                                    <th class="p-3 font-medium">Atividade</th>
+                                    <th class="p-3 font-medium">Responsável</th>
+                                    <th class="p-3 font-medium">Prazo Limite</th>
+                                    <th class="p-3 font-medium">Situação</th>
                                 </tr>
                             </thead>
-                            <tbody id="dash-deadlines-table" class="divide-y">
+                            <tbody id="dash-deadlines-table" class="divide-y divide-gray-100 text-gray-600">
                                 </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-tasks" class="hidden p-6 space-y-6">
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">Painel Operacional de Tarefas</h2>
+            <div id="tab-tasks" class="hidden p-8 space-y-8 tab-animate">
+                <div class="flex flex-col gap-1">
+                    <h2 class="text-xl font-bold text-gray-900">Painel Operacional de Tarefas</h2>
+                    <p class="text-xs text-gray-400">Crie, modifique e altere o estágio de produção de cada demanda.</p>
+                </div>
                 
-                <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
-                    <h3 class="text-sm font-bold text-gray-700 uppercase mb-4 tracking-wide">➕ Registrar Nova Atividade</h3>
+                <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                     <form id="task-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500">Cliente / Empresa</label>
-                            <input type="text" id="task-client" required class="mt-1 block w-full rounded-lg border p-2 bg-gray-50 text-sm focus:ring-1 focus:ring-[#533ABF]">
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Cliente / Empresa</label>
+                            <input type="text" id="task-client" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500">Tarefa / Descrição</label>
-                            <input type="text" id="task-desc" required class="mt-1 block w-full rounded-lg border p-2 bg-gray-50 text-sm focus:ring-1 focus:ring-[#533ABF]">
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarefa / Descrição</label>
+                            <input type="text" id="task-desc" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500">Responsável</label>
-                            <input type="text" id="task-assignee" required class="mt-1 block w-full rounded-lg border p-2 bg-gray-50 text-sm focus:ring-1 focus:ring-[#533ABF]">
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Responsável</label>
+                            <input type="text" id="task-assignee" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-gray-500">🗓️ Data Limite</label>
-                            <input type="date" id="task-deadline" required class="mt-1 block w-full rounded-lg border p-2 bg-gray-50 text-sm focus:ring-1 focus:ring-[#533ABF]">
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">🗓️ Data Limite</label>
+                            <input type="date" id="task-deadline" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
                         </div>
-                        <button type="submit" class="bg-[#533ABF] text-[#FEFEFE] p-2.5 rounded-lg text-sm hover:bg-[#422e99] font-bold transition shadow cursor-pointer">Adicionar ao Fluxo</button>
+                        <button type="submit" class="bg-[#533ABF] text-[#FEFEFE] py-2.5 px-4 rounded-xl text-xs hover:bg-[#422e99] active:scale-[0.98] font-semibold transition-all shadow-sm cursor-pointer h-[38px]">Adicionar Fluxo</button>
                     </form>
                 </section>
 
                 <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-gray-100 p-4 rounded-2xl min-h-[450px]">
-                        <h4 class="font-bold text-gray-700 mb-4 flex justify-between items-center px-1">🔴 Pendente <span id="count-todo" class="bg-red-100 text-red-700 text-xs px-2.5 py-1 rounded-full font-bold">0</span></h4>
+                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[450px]">
+                        <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 mb-4 flex justify-between items-center px-1">🔴 Pendente <span id="count-todo" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
                         <div id="col-todo" class="space-y-3"></div>
                     </div>
-                    <div class="bg-gray-100 p-4 rounded-2xl min-h-[450px]">
-                        <h4 class="font-bold text-gray-700 mb-4 flex justify-between items-center px-1">🟡 Em Andamento <span id="count-doing" class="bg-yellow-100 text-yellow-700 text-xs px-2.5 py-1 rounded-full font-bold">0</span></h4>
+                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[450px]">
+                        <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 mb-4 flex justify-between items-center px-1">🟡 Em Andamento <span id="count-doing" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
                         <div id="col-doing" class="space-y-3"></div>
                     </div>
-                    <div class="bg-gray-100 p-4 rounded-2xl min-h-[450px]">
-                        <h4 class="font-bold text-gray-700 mb-4 flex justify-between items-center px-1">🟢 Concluído <span id="count-done" class="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold">0</span></h4>
+                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[450px]">
+                        <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 mb-4 flex justify-between items-center px-1">🟢 Concluído <span id="count-done" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
                         <div id="col-done" class="space-y-3"></div>
                     </div>
                 </section>
             </div>
 
-            <div id="tab-summary" class="hidden p-6 space-y-6">
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3">Relatórios de Produtividade</h2>
+            <div id="tab-summary" class="hidden p-8 space-y-8 tab-animate">
+                <div class="flex flex-col gap-1">
+                    <h2 class="text-xl font-bold text-gray-900">Relatórios de Produtividade</h2>
+                    <p class="text-xs text-gray-400">Analise a performance de entregas cruzando dados e períodos.</p>
+                </div>
                 
-                <section class="bg-white p-4 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 items-end border">
+                <section class="bg-white p-4 rounded-2xl shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 items-end border border-gray-100">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500">Início do Período</label>
-                        <input type="date" id="filter-start" class="mt-1 block w-full rounded-lg border p-2 text-sm bg-gray-50">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Início Período</label>
+                        <input type="date" id="filter-start" class="mt-1 block w-full rounded-xl border border-gray-200 p-2 text-xs bg-gray-50/50">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500">Fim do Período</label>
-                        <input type="date" id="filter-end" class="mt-1 block w-full rounded-lg border p-2 text-sm bg-gray-50">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Fim Período</label>
+                        <input type="date" id="filter-end" class="mt-1 block w-full rounded-xl border border-gray-200 p-2 text-xs bg-gray-50/50">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500">Responsável</label>
-                        <input type="text" id="filter-assignee" placeholder="Todos" class="mt-1 block w-full rounded-lg border p-2 text-sm bg-gray-50">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Responsável</label>
+                        <input type="text" id="filter-assignee" placeholder="Filtrar por nome" class="mt-1 block w-full rounded-xl border border-gray-200 p-2 text-xs bg-gray-50/50">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-500">Situação</label>
-                        <select id="filter-status" class="mt-1 block w-full rounded-lg border p-2 text-sm bg-gray-50">
+                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Situação</label>
+                        <select id="filter-status" class="mt-1 block w-full rounded-xl border border-gray-200 p-2 text-xs bg-gray-50/50">
                             <option value="all">Todas as Situações</option>
                             <option value="todo">🔴 Pendente</option>
                             <option value="doing">🟡 Em Andamento</option>
@@ -171,109 +194,137 @@
                 </section>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm border max-h-[500px] overflow-y-auto">
-                        <h3 class="font-bold text-gray-700 mb-3">📋 Listagem de Atividades Filtradas</h3>
-                        <div id="summary-list" class="space-y-2 divide-y">
-                            </div>
+                    <div class="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 max-h-[500px] overflow-y-auto">
+                        <h3 class="font-medium text-xs uppercase tracking-wider text-gray-400 mb-4">📋 Listagem Correlacionada</h3>
+                        <div id="summary-list" class="space-y-1 divide-y divide-gray-100"></div>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border flex flex-col items-center justify-center">
-                        <h3 class="font-bold text-gray-700 mb-4 self-start">📊 Distribuição das Atividades</h3>
-                        <div class="w-full max-w-[240px]">
+                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+                        <h3 class="font-medium text-xs uppercase tracking-wider text-gray-400 mb-6 self-start">📊 Distribuição</h3>
+                        <div class="w-full max-w-[210px]">
                             <canvas id="productivityChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-calendar" class="hidden p-6 relative flex-1 flex flex-col">
-                <h2 class="text-2xl font-bold text-gray-800 border-b pb-3 mb-4">Calendário Integrado de Atividades</h2>
+            <div id="tab-calendar" class="hidden p-8 relative flex-1 flex flex-col tab-animate">
+                <div class="flex flex-col gap-1 mb-4">
+                    <h2 class="text-xl font-bold text-gray-900">Calendário Integrado</h2>
+                    <p class="text-xs text-gray-400">Cronograma de entregas mapeadas por datas críticas.</p>
+                </div>
                 
                 <div class="mb-4 max-w-xs">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1">Filtrar calendário por responsável:</label>
-                    <input type="text" id="calendar-filter-user" placeholder="Filtrar por nome..." class="w-full p-2 text-sm bg-white border rounded-lg shadow-sm">
+                    <input type="text" id="calendar-filter-user" placeholder="Filtrar por responsável..." class="w-full p-2 text-xs bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:border-[#533ABF]">
                 </div>
 
-                <div class="flex-1 bg-white p-4 rounded-2xl shadow-sm border min-h-[500px]">
-                    <div id="calendar-widget"></div>
+                <div class="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 min-h-[500px]">
+                    <div id="calendar-widget" class="text-xs"></div>
                 </div>
 
                 <div id="calendar-drawer" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl border-l z-50 transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between">
                     <div>
-                        <div class="flex justify-between items-center border-b pb-3 mb-4">
-                            <h3 class="font-bold text-lg text-[#533ABF]">ℹ️ Detalhes da Demanda</h3>
-                            <button onclick="toggleDrawer(false)" class="text-gray-400 hover:text-gray-600 text-lg cursor-pointer">✕</button>
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
+                            <h3 class="font-bold text-sm text-[#533ABF]">ℹ️ Detalhes da Demanda</h3>
+                            <button onclick="toggleDrawer(false)" class="text-gray-400 hover:text-gray-600 text-sm cursor-pointer">✕</button>
                         </div>
-                        <div class="space-y-4 text-sm">
-                            <div><span class="block text-xs font-bold text-gray-400 uppercase">Cliente / Empresa</span><p id="drawer-client" class="text-base font-semibold text-gray-800"></p></div>
-                            <div><span class="block text-xs font-bold text-gray-400 uppercase">Atividade</span><p id="drawer-desc" class="text-gray-600"></p></div>
-                            <div><span class="block text-xs font-bold text-gray-400 uppercase">Responsável da Equipe</span><p id="drawer-assignee" class="font-medium text-gray-700"></p></div>
-                            <div><span class="block text-xs font-bold text-gray-400 uppercase">Data Limite</span><p id="drawer-deadline" class="font-mono text-gray-700"></p></div>
-                            <div><span class="block text-xs font-bold text-gray-400 uppercase">Situação Atual</span><span id="drawer-status" class="inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold"></span></div>
+                        <div class="space-y-4 text-xs">
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Cliente / Empresa</span><p id="drawer-client" class="text-sm font-semibold text-gray-800 mt-0.5"></p></div>
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Atividade</span><p id="drawer-desc" class="text-gray-600 mt-0.5"></p></div>
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Responsável da Equipe</span><p id="drawer-assignee" class="font-medium text-gray-700 mt-0.5"></p></div>
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Data Limite</span><p id="drawer-deadline" class="font-mono text-gray-700 mt-0.5"></p></div>
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Situação Atual</span><span id="drawer-status" class="inline-block mt-1 px-3 py-1 rounded-full font-bold text-[10px]"></span></div>
                         </div>
-                    </div>
-                    <div class="border-t pt-4">
-                        <p class="text-xs text-gray-400 italic">Para editar ou gerenciar o andamento, acesse o painel na aba de Tarefas.</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-xs transition-opacity duration-300 opacity-0">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
+                <h3 class="font-bold text-sm text-gray-800">📝 Editar Detalhes da Atividade</h3>
+                <button onclick="fecharModalEdicao()" class="text-gray-400 hover:text-gray-600 font-bold cursor-pointer">✕</button>
+            </div>
+            <form id="edit-form" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Cliente</label>
+                    <input type="text" id="edit-client" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Tarefa / Descrição</label>
+                    <input type="text" id="edit-desc" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Responsável</label>
+                    <input type="text" id="edit-assignee" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Data Limite</label>
+                    <input type="date" id="edit-deadline" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="fecharModalEdicao()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors">Cancelar</button>
+                    <button type="submit" class="bg-[#533ABF] hover:bg-[#422e99] text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-sm">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // CONFIGURAÇÕES SUPABASE
+        // CONFIGURAÇÕES DO BANCO DE DADOS
         const SUPABASE_URL = "https://gsfudqnpcvabzxmhhdtk.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_twXP0o4wO7lPf62lvBUbGw_E035byKS"; 
 
         const crmBanco = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Estado Global local das Atividades
         let todasAtividades = [];
         let fullCalendarInstance = null;
         let chartInstance = null;
+        let editingTaskId = null; // Guarda ID da tarefa em alteração
 
-        // Gerenciamento das Telas de Login/App
+        // Escuta e Monitoria de Autenticação
         crmBanco.auth.onAuthStateChange((event, session) => {
+            const app = document.getElementById('app-screen');
             if (session) {
                 document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('app-screen').classList.remove('hidden');
-                document.getElementById('user-display').innerText = `👤 ${session.user.email}`;
+                app.classList.remove('hidden');
+                setTimeout(() => app.classList.remove('opacity-0'), 50);
+                document.getElementById('user-display').innerText = `CONECTADO: ${session.user.email}`;
                 sincronizarDados();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
-                document.getElementById('app-screen').classList.add('hidden');
+                app.classList.add('hidden', 'opacity-0');
             }
         });
 
-        // Evento de login
+        // Formulário Login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
             const { error } = await crmBanco.auth.signInWithPassword({ email, password });
-            if (error) alert("Erro de Acesso: " + error.message);
+            if (error) alert("Erro: " + error.message);
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => { await crmBanco.auth.signOut(); });
 
-        // Navegação por Abas
+        // Controle do Sistema de Abas Animado
         function switchTab(tabName) {
             ['home', 'tasks', 'summary', 'calendar'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
-                document.getElementById(`btn-tab-${t}`).classList.remove('bg-[#E424C8]', 'bg-white/10');
+                document.getElementById(`btn-tab-${t}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5";
             });
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.getElementById(`btn-tab-${tabName}`).classList.add('bg-[#E424C8]');
             
-            // Re-renderização forçada de widgets dinâmicos
-            if (tabName === 'calendar' && fullCalendarInstance) {
-                setTimeout(() => fullCalendarInstance.render(), 50);
-            }
-            if (tabName === 'summary') {
-                processarFiltrosERelatorios();
-            }
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            targetTab.classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white";
+            
+            if (tabName === 'calendar' && fullCalendarInstance) setTimeout(() => fullCalendarInstance.render(), 50);
+            if (tabName === 'summary') processarFiltrosERelatorios();
         }
 
-        // Criar Atividade no banco
+        // Criar Atividade
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const cliente = document.getElementById('task-client').value;
@@ -282,28 +333,67 @@
             const data_limite = document.getElementById('task-deadline').value;
 
             const { error } = await crmBanco.from('tarefas').insert([{ cliente, descricao, responsavel, data_limite, status: 'todo' }]);
-            if (error) alert("Erro ao salvar: " + error.message);
-            else {
-                document.getElementById('task-form').reset();
-                sincronizarDados();
-            }
+            if (error) alert(error.message);
+            else { document.getElementById('task-form').reset(); sincronizarDados(); }
         });
 
-        // Atualizar Status da Atividade
+        // Atualizar Status (Mudança Bidirecional Suportada)
         async function moverTarefa(id, novoStatus) {
             await crmBanco.from('tarefas').update({ status: novoStatus }).eq('id', id);
             sincronizarDados();
         }
 
-        // Deletar Atividade
+        // Deletar Registro
         async function deletarTarefa(id) {
-            if(confirm("Deseja permanentemente excluir esta atividade?")) {
+            if(confirm("Deseja apagar permanentemente?")) {
                 await crmBanco.from('tarefas').delete().eq('id', id);
                 sincronizarDados();
             }
         }
 
-        // Sincronização Geral e Cache Local
+        // --- SISTEMA INTERNO DE EDIÇÃO (NOVO) ---
+        function abrirModalEdicao(id) {
+            const tarefa = todasAtividades.find(t => t.id === id);
+            if (!tarefa) return;
+            
+            editingTaskId = tarefa.id;
+            document.getElementById('edit-client').value = tarefa.cliente;
+            document.getElementById('edit-desc').value = tarefa.descricao;
+            document.getElementById('edit-assignee').value = tarefa.responsavel;
+            document.getElementById('edit-deadline').value = tarefa.data_limite || '';
+
+            const modal = document.getElementById('edit-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function fecharModalEdicao() {
+            const modal = document.getElementById('edit-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('.transform').classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); editingTaskId = null; }, 300);
+        }
+
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!editingTaskId) return;
+
+            const cliente = document.getElementById('edit-client').value;
+            const descricao = document.getElementById('edit-desc').value;
+            const responsavel = document.getElementById('edit-assignee').value;
+            const data_limite = document.getElementById('edit-deadline').value;
+
+            const { error } = await crmBanco.from('tarefas').update({ cliente, descricao, responsavel, data_limite }).eq('id', editingTaskId);
+            
+            if (error) alert("Erro na atualização: " + error.message);
+            else { fecharModalEdicao(); sincronizarDados(); }
+        });
+        // ----------------------------------------
+
+        // Pipeline Integrado de Sincronização
         async function sincronizarDados() {
             const { data, error } = await crmBanco.from('tarefas').select('*').order('data_limite', { ascending: true });
             if (error) return;
@@ -315,36 +405,34 @@
             renderizarCalendario();
         }
 
-        // 1. Lógica da Página Inicial
+        // Render: Home
         function renderizarPaginaInicial() {
-            let counters = { todo: 0, doing: 0, done: 0 };
-            todasAtividades.forEach(t => counters[t.status]++);
+            let cnt = { todo: 0, doing: 0, done: 0 };
+            todasAtividades.forEach(t => cnt[t.status]++);
 
             document.getElementById('dash-total').innerText = todasAtividades.length;
-            document.getElementById('dash-todo').innerText = counters.todo;
-            document.getElementById('dash-doing').innerText = counters.doing;
-            document.getElementById('dash-done').innerText = counters.done;
+            document.getElementById('dash-todo').innerText = cnt.todo;
+            document.getElementById('dash-doing').innerText = cnt.doing;
+            document.getElementById('dash-done').innerText = cnt.done;
 
             const tbody = document.getElementById('dash-deadlines-table');
             tbody.innerHTML = '';
             
-            // Filtra as primeiras 5 próximas demandas não concluídas
-            const proximas = todasAtividades.filter(t => t.status !== 'done').slice(0, 5);
-            proximas.forEach(t => {
-                const statusBadge = t.status === 'todo' ? '🔴 Pendente' : '🟡 Em Andamento';
-                const dataFormatada = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Data';
+            todasAtividades.filter(t => t.status !== 'done').slice(0, 5).forEach(t => {
+                const badge = t.status === 'todo' ? '🔴 Pendente' : '🟡 Em Andamento';
+                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-3 font-semibold text-gray-700">${t.cliente}</td>
-                        <td class="p-3 text-gray-600">${t.descricao}</td>
-                        <td class="p-3 font-medium text-gray-600">👤 ${t.responsavel}</td>
-                        <td class="p-3 font-mono font-bold text-red-600">${dataFormatada}</td>
-                        <td class="p-3 text-xs">${statusBadge}</td>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="p-3 font-medium text-gray-800">${t.cliente}</td>
+                        <td class="p-3 text-gray-500">${t.descricao}</td>
+                        <td class="p-3 text-gray-500">👤 ${t.responsavel}</td>
+                        <td class="p-3 font-mono font-medium text-red-500">${dt}</td>
+                        <td class="p-3 text-[10px]">${badge}</td>
                     </tr>`;
             });
         }
 
-        // 2. Lógica do Quadro Operacional (Kanban)
+        // Render: Kanban (Com Botões Bidirecionais e Edição)
         function renderizarKanban() {
             const cols = { todo: document.getElementById('col-todo'), doing: document.getElementById('col-doing'), done: document.getElementById('col-done') };
             Object.values(cols).forEach(col => col.innerHTML = '');
@@ -352,20 +440,36 @@
 
             todasAtividades.forEach(t => {
                 counts[t.status]++;
-                let actionBtn = t.status === 'todo' ? `<button onclick="moverTarefa(${t.id}, 'doing')" class="text-xs bg-yellow-500 text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer">Início 👉</button>` : t.status === 'doing' ? `<button onclick="moverTarefa(${t.id}, 'done')" class="text-xs bg-green-500 text-white px-3 py-1.5 rounded-lg font-bold cursor-pointer">Finalizar ✔️</button>` : '';
-                const dataFormatada = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Data';
+                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
+                
+                // Criação Dinâmica dos Controles Avançados do Fluxo Minimalista
+                let controlButtons = '';
+                if (t.status === 'todo') {
+                    controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer">Iniciar 👉</button></div>`;
+                } else if (t.status === 'doing') {
+                    controlButtons = `
+                        <div class="w-full flex justify-between items-center">
+                            <button onclick="moverTarefa(${t.id}, 'todo')" class="text-[10px] text-gray-400 hover:text-red-500 transition-colors cursor-pointer">👈 Retornar</button>
+                            <button onclick="moverTarefa(${t.id}, 'done')" class="text-[10px] bg-green-600 text-white px-3 py-1 rounded-lg font-medium hover:bg-green-700 transition-colors cursor-pointer">Concluir ✔️</button>
+                        </div>`;
+                } else if (t.status === 'done') {
+                    controlButtons = `<div class="w-full flex justify-start"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] text-gray-400 hover:text-[#533ABF] transition-colors cursor-pointer">↺ Reabrir Demanda</button></div>`;
+                }
 
                 cols[t.status].innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 ${t.status === 'todo' ? 'border-red-400' : t.status === 'doing' ? 'border-yellow-400' : 'border-green-400'} space-y-2">
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md space-y-2.5">
                         <div class="flex justify-between items-start">
-                            <h5 class="font-bold text-sm text-gray-800">${t.cliente}</h5>
-                            <button onclick="deletarTarefa(${t.id})" class="text-gray-400 hover:text-red-500 text-xs font-bold cursor-pointer">✕</button>
+                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[140px]">${t.cliente}</h5>
+                            <div class="flex gap-2">
+                                <button onclick="abrirModalEdicao(${t.id})" class="text-gray-300 hover:text-[#533ABF] text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
+                                <button onclick="deletarTarefa(${t.id})" class="text-gray-300 hover:text-red-500 text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-600">${t.descricao}</p>
-                        <div class="text-[10px] text-gray-400 font-bold">🗓️ Prazo: <span class="font-mono text-gray-700">${dataFormatada}</span></div>
-                        <div class="flex justify-between items-center pt-1 border-t border-gray-100">
-                            <span class="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md font-medium">👤 ${t.responsavel}</span>
-                            ${actionBtn}
+                        <p class="text-[11px] text-gray-500 line-clamp-2">${t.descricao}</p>
+                        <div class="text-[9px] text-gray-400 font-medium">Prazo: <span class="font-mono text-gray-600">${dt}</span></div>
+                        <div class="pt-2 border-t border-gray-50 flex flex-col gap-2">
+                            <div class="text-[9px] text-gray-400">👤 ${t.responsavel}</div>
+                            ${controlButtons}
                         </div>
                     </div>`;
             });
@@ -375,7 +479,7 @@
             document.getElementById('count-done').innerText = counts.done;
         }
 
-        // 3. Lógica de Filtros e Relatórios Dinâmicos
+        // Relatórios Dinâmicos
         ['filter-start', 'filter-end', 'filter-assignee', 'filter-status'].forEach(id => {
             document.getElementById(id).addEventListener('input', processarFiltrosERelatorios);
         });
@@ -386,8 +490,7 @@
             const assignee = document.getElementById('filter-assignee').value.toLowerCase().trim();
             const status = document.getElementById('filter-status').value;
 
-            // Filtragem lógica
-            let filtrados = todasAtividades.filter(t => {
+            let filtered = todasAtividades.filter(t => {
                 if (start && t.data_limite && t.data_limite < start) return false;
                 if (end && t.data_limite && t.data_limite > end) return false;
                 if (assignee && !t.responsavel.toLowerCase().includes(assignee)) return false;
@@ -395,29 +498,25 @@
                 return true;
             });
 
-            // Renderizar Lista Filtrada
-            const listContainer = document.getElementById('summary-list');
-            listContainer.innerHTML = filtrados.length === 0 ? '<p class="text-gray-400 text-sm italic p-4 text-center">Nenhuma atividade localizada com esses critérios.</p>' : '';
+            const list = document.getElementById('summary-list');
+            list.innerHTML = filtered.length === 0 ? '<p class="text-gray-400 text-xs italic py-4 text-center">Nenhum registro correspondente.</p>' : '';
             
-            let chartData = { todo: 0, doing: 0, done: 0 };
+            let chData = { todo: 0, doing: 0, done: 0 };
 
-            filtrados.forEach(t => {
-                chartData[t.status]++;
-                const badge = t.status === 'todo' ? 'bg-red-100 text-red-700' : t.status === 'doing' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700';
-                const statusTxt = t.status === 'todo' ? 'Pendente' : t.status === 'doing' ? 'Em Andamento' : 'Concluído';
-                const dataFormatada = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem data';
-
-                listContainer.innerHTML += `
-                    <div class="py-3 flex justify-between items-center text-sm gap-2">
+            filtered.forEach(t => {
+                chData[t.status]++;
+                const badge = t.status === 'todo' ? 'bg-red-50 text-red-600' : t.status === 'doing' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600';
+                const txt = t.status === 'todo' ? 'Pendente' : t.status === 'doing' ? 'Em Andamento' : 'Concluído';
+                list.innerHTML += `
+                    <div class="py-2.5 flex justify-between items-center text-xs">
                         <div>
-                            <p class="font-bold text-gray-800">${t.cliente} <span class="font-normal text-gray-500">- ${t.descricao}</span></p>
-                            <p class="text-xs text-gray-400 font-medium">Responsável: 👤 ${t.responsavel} | Prazo: ${dataFormatada}</p>
+                            <p class="font-medium text-gray-800">${t.cliente} <span class="text-gray-400 font-normal">- ${t.descricao}</span></p>
+                            <p class="text-[10px] text-gray-400">Responsável: ${t.responsavel}</p>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${badge}">${statusTxt}</span>
+                        <span class="px-2 py-0.5 rounded-md font-medium text-[9px] ${badge}">${txt}</span>
                     </div>`;
             });
 
-            // Atualização do Gráfico Chart.js
             if (chartInstance) chartInstance.destroy();
             const ctx = document.getElementById('productivityChart').getContext('2d');
             chartInstance = new Chart(ctx, {
@@ -425,23 +524,22 @@
                 data: {
                     labels: ['Pendente', 'Em Andamento', 'Concluído'],
                     datasets: [{
-                        data: [chartData.todo, chartData.doing, chartData.done],
+                        data: [chData.todo, chData.doing, chData.done],
                         backgroundColor: ['#EF4444', '#F59E0B', '#10B981'],
                         borderWidth: 0
                     }]
                 },
-                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } } }
+                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } }
             });
         }
 
-        // 4. Lógica da Aba do Calendário
+        // Calendário Integrado
         document.getElementById('calendar-filter-user').addEventListener('input', renderizarCalendario);
 
         function renderizarCalendario() {
             const filterUser = document.getElementById('calendar-filter-user').value.toLowerCase().trim();
             const calendarEl = document.getElementById('calendar-widget');
             
-            // Converte dados do CRM para formato que o FullCalendar aceita
             const eventosMap = todasAtividades
                 .filter(t => t.data_limite && (!filterUser || t.responsavel.toLowerCase().includes(filterUser)))
                 .map(t => ({
@@ -458,18 +556,14 @@
             fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'pt-br',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-                buttonText: { today: 'Hoje', month: 'Mês', week: 'Semana' },
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
+                buttonText: { today: 'Hoje' },
                 events: eventosMap,
-                eventClick: function(info) {
-                    abrirDetalhesNoDrawer(info.event.extendedProps);
-                }
+                eventClick: function(info) { abrirDetalhesNoDrawer(info.event.extendedProps); }
             });
-
             fullCalendarInstance.render();
         }
 
-        // Painel Lateral Retrátil (Drawer)
         function toggleDrawer(open) {
             const drawer = document.getElementById('calendar-drawer');
             if (open) drawer.classList.remove('translate-x-full');
@@ -485,15 +579,14 @@
             const statusEl = document.getElementById('drawer-status');
             if (task.status === 'todo') {
                 statusEl.innerText = '🔴 Pendente';
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700';
+                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700';
             } else if (task.status === 'doing') {
                 statusEl.innerText = '🟡 Em Andamento';
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700';
+                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700';
             } else {
                 statusEl.innerText = '🟢 Concluído';
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700';
+                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-700';
             }
-
             toggleDrawer(true);
         }
     </script>
