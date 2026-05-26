@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrimaPay - CRM & Tarefas</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
@@ -24,10 +24,10 @@
         ::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
     </style>
 </head>
-<body class="bg-[#FEFEFE] font-sans min-h-screen antialiased text-gray-800 flex flex-col justify-between">
+<body class="bg-[#FEFEFE] font-sans min-h-screen antialiased text-gray-800 flex flex-col justify-between overflow-x-hidden">
 
-    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-[#533ABF] transition-all duration-500">
-        <div class="bg-[#FEFEFE] p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-4 border-[#E424C8] transform transition-transform duration-500 hover:scale-[1.01]">
+    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-[#533ABF] transition-all duration-500 p-4">
+        <div class="bg-[#FEFEFE] p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-4 border-[#E424C8] transform transition-transform duration-500 hover:scale-[1.01]">
             <div class="flex justify-center mb-6">
                 <img src="logo.png" alt="PrimaPay" class="h-10 object-contain" onerror="this.src='https://placehold.co/200x60/533ABF/ffffff?text=PrimaPay'">
             </div>
@@ -53,12 +53,23 @@
         </div>
     </div>
 
-    <div id="app-screen" class="hidden flex min-h-screen transition-opacity duration-500 opacity-0">
+    <div id="app-screen" class="hidden flex-col md:flex-row min-h-screen transition-opacity duration-500 opacity-0 relative">
         
-        <aside class="w-64 bg-[#533ABF] text-[#FEFEFE] flex flex-col justify-between shadow-xl shrink-0 transition-all duration-300">
+        <header class="md:hidden bg-[#533ABF] flex items-center justify-between p-4 shadow-md z-30 shrink-0">
+            <img src="logo.png" alt="PrimaPay" class="h-7 object-contain" onerror="this.src='https://placehold.co/120x40/533ABF/ffffff?text=PrimaPay'">
+            <button onclick="toggleSidebar()" class="text-white hover:text-gray-200 focus:outline-none cursor-pointer">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+        </header>
+
+        <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden backdrop-blur-sm transition-opacity"></div>
+
+        <aside id="main-sidebar" class="fixed inset-y-0 left-0 w-64 bg-[#533ABF] text-[#FEFEFE] flex flex-col justify-between shadow-xl shrink-0 transition-transform duration-300 z-50 transform -translate-x-full md:relative md:translate-x-0">
             <div>
-                <div class="p-6 border-b border-white/5 flex justify-center">
-                    <img src="logo.png" alt="PrimaPay" class="h-8 object-contain" onerror="this.src='https://placehold.co/150x50/533ABF/ffffff?text=PrimaPay'">
+                <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                    <img src="logo.png" alt="PrimaPay" class="h-8 object-contain hidden md:block" onerror="this.src='https://placehold.co/150x50/533ABF/ffffff?text=PrimaPay'">
+                    <span class="md:hidden font-bold tracking-widest uppercase text-sm">Menu</span>
+                    <button onclick="toggleSidebar()" class="md:hidden text-white/70 hover:text-white cursor-pointer font-bold">✕</button>
                 </div>
                 <nav class="p-4 space-y-1">
                     <button onclick="switchTab('home')" id="btn-tab-home" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm">
@@ -81,35 +92,35 @@
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col overflow-y-auto max-h-screen bg-gray-50/50">
+        <main class="flex-1 flex flex-col overflow-y-auto max-h-screen md:h-screen bg-gray-50/50 w-full relative">
             
-            <div id="tab-home" class="p-8 space-y-8 tab-animate">
+            <div id="tab-home" class="p-4 md:p-8 space-y-6 md:space-y-8 tab-animate">
                 <div class="flex flex-col gap-1">
                     <h2 class="text-xl font-bold text-gray-900">Visão Geral do CRM</h2>
                     <p class="text-xs text-gray-400">Métricas consolidadas e próximos marcos operacionais da PrimaPay.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Demandas</p>
-                        <p id="dash-total" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+                    <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md">
+                        <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Demandas</p>
+                        <p id="dash-total" class="text-xl md:text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-red-400">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🔴 Pendentes</p>
-                        <p id="dash-todo" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
+                    <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-red-400">
+                        <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">🔴 Pendentes</p>
+                        <p id="dash-todo" class="text-xl md:text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-yellow-400">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🟡 Em Andamento</p>
-                        <p id="dash-doing" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
+                    <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-yellow-400">
+                        <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">🟡 Em Andamento</p>
+                        <p id="dash-doing" class="text-xl md:text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-green-400">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🟢 Concluídas</p>
-                        <p id="dash-done" class="text-2xl font-semibold text-gray-800 mt-1">0</p>
+                    <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md border-l-4 border-green-400">
+                        <p class="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">🟢 Concluídas</p>
+                        <p id="dash-done" class="text-xl md:text-2xl font-semibold text-gray-800 mt-1">0</p>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 w-full overflow-hidden">
                     <h3 class="font-medium text-sm text-gray-700 mb-4 tracking-wide">⏰ Alertas de Prazos Próximos</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-xs text-left">
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-xs text-left min-w-[500px]">
                             <thead class="bg-gray-50 text-gray-400 uppercase text-[10px] tracking-wider">
                                 <tr>
                                     <th class="p-3 font-medium">Cliente</th>
@@ -126,13 +137,13 @@
                 </div>
             </div>
 
-            <div id="tab-tasks" class="hidden p-8 space-y-8 tab-animate">
+            <div id="tab-tasks" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 tab-animate">
                 <div class="flex flex-col gap-1">
                     <h2 class="text-xl font-bold text-gray-900">Painel Operacional de Tarefas</h2>
                     <p class="text-xs text-gray-400">Crie, modifique e altere o estágio de produção de cada demanda.</p>
                 </div>
                 
-                <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100">
                     <form id="task-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                         <div>
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Cliente / Empresa</label>
@@ -150,33 +161,33 @@
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">🗓️ Data Limite</label>
                             <input type="date" id="task-deadline" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
                         </div>
-                        <button type="submit" class="bg-[#533ABF] text-[#FEFEFE] py-2.5 px-4 rounded-xl text-xs hover:bg-[#422e99] active:scale-[0.98] font-semibold transition-all shadow-sm cursor-pointer h-[38px]">Adicionar Fluxo</button>
+                        <button type="submit" class="w-full bg-[#533ABF] text-[#FEFEFE] py-2.5 px-4 rounded-xl text-xs hover:bg-[#422e99] active:scale-[0.98] font-semibold transition-all shadow-sm cursor-pointer h-[38px]">Adicionar Fluxo</button>
                     </form>
                 </section>
 
-                <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[450px]">
+                <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[300px] lg:min-h-[450px]">
                         <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 mb-4 flex justify-between items-center px-1">🔴 Pendente <span id="count-todo" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
                         <div id="col-todo" class="space-y-3"></div>
                     </div>
-                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[450px]">
+                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[300px] lg:min-h-[450px]">
                         <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 mb-4 flex justify-between items-center px-1">🟡 Em Andamento <span id="count-doing" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
                         <div id="col-doing" class="space-y-3"></div>
                     </div>
-                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[450px]">
+                    <div class="bg-gray-100/50 p-4 rounded-2xl min-h-[300px] lg:min-h-[450px]">
                         <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 mb-4 flex justify-between items-center px-1">🟢 Concluído <span id="count-done" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
                         <div id="col-done" class="space-y-3"></div>
                     </div>
                 </section>
             </div>
 
-            <div id="tab-summary" class="hidden p-8 space-y-8 tab-animate">
+            <div id="tab-summary" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 tab-animate">
                 <div class="flex flex-col gap-1">
                     <h2 class="text-xl font-bold text-gray-900">Relatórios de Produtividade</h2>
                     <p class="text-xs text-gray-400">Analise a performance de entregas cruzando dados e períodos.</p>
                 </div>
                 
-                <section class="bg-white p-4 rounded-2xl shadow-sm grid grid-cols-1 md:grid-cols-4 gap-4 items-end border border-gray-100">
+                <section class="bg-white p-4 rounded-2xl shadow-sm grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end border border-gray-100">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Início Período</label>
                         <input type="date" id="filter-start" class="mt-1 block w-full rounded-xl border border-gray-200 p-2 text-xs bg-gray-50/50">
@@ -200,39 +211,39 @@
                     </div>
                 </section>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="md:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-gray-100 max-h-[500px] overflow-y-auto">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 max-h-[500px] overflow-y-auto">
                         <h3 class="font-medium text-xs uppercase tracking-wider text-gray-400 mb-4">📋 Listagem Correlacionada</h3>
                         <div id="summary-list" class="space-y-1 divide-y divide-gray-100"></div>
                     </div>
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
+                    <div class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center">
                         <h3 class="font-medium text-xs uppercase tracking-wider text-gray-400 mb-6 self-start">📊 Distribuição</h3>
-                        <div class="w-full max-w-[210px]">
+                        <div class="w-full max-w-[210px] mx-auto">
                             <canvas id="productivityChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="tab-calendar" class="hidden p-8 relative flex-1 flex flex-col tab-animate">
+            <div id="tab-calendar" class="hidden p-4 md:p-8 relative flex-1 flex flex-col tab-animate">
                 <div class="flex flex-col gap-1 mb-4">
                     <h2 class="text-xl font-bold text-gray-900">Calendário Integrado</h2>
                     <p class="text-xs text-gray-400">Cronograma de entregas mapeadas por datas críticas.</p>
                 </div>
                 
-                <div class="mb-4 max-w-xs">
+                <div class="mb-4 w-full md:max-w-xs">
                     <input type="text" id="calendar-filter-user" placeholder="Filtrar por responsável..." class="w-full p-2 text-xs bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:border-[#533ABF]">
                 </div>
 
-                <div class="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 min-h-[500px]">
-                    <div id="calendar-widget" class="text-xs"></div>
+                <div class="flex-1 bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-gray-100 min-h-[500px] overflow-x-auto">
+                    <div id="calendar-widget" class="text-xs min-w-[600px] md:min-w-full"></div>
                 </div>
 
-                <div id="calendar-drawer" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl border-l z-50 transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between">
+                <div id="calendar-drawer" class="fixed top-0 right-0 h-full w-full sm:w-80 bg-white shadow-2xl border-l z-[60] transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
                             <h3 class="font-bold text-sm text-[#533ABF]">ℹ️ Detalhes da Demanda</h3>
-                            <button onclick="toggleDrawer(false)" class="text-gray-400 hover:text-gray-600 text-sm cursor-pointer">✕</button>
+                            <button onclick="toggleDrawer(false)" class="text-gray-400 hover:text-gray-600 text-lg cursor-pointer">✕</button>
                         </div>
                         <div class="space-y-4 text-xs">
                             <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Cliente / Empresa</span><p id="drawer-client" class="text-sm font-semibold text-gray-800 mt-0.5"></p></div>
@@ -247,11 +258,11 @@
         </main>
     </div>
 
-    <div id="edit-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-xs transition-opacity duration-300 opacity-0">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300">
+    <div id="edit-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-[70] backdrop-blur-xs transition-opacity duration-300 opacity-0 p-4">
+        <div class="bg-white p-5 md:p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300">
             <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
                 <h3 class="font-bold text-sm text-gray-800">📝 Editar Detalhes da Atividade</h3>
-                <button onclick="fecharModalEdicao()" class="text-gray-400 hover:text-gray-600 font-bold cursor-pointer">✕</button>
+                <button onclick="fecharModalEdicao()" class="text-gray-400 hover:text-gray-600 font-bold cursor-pointer text-lg">✕</button>
             </div>
             <form id="edit-form" class="space-y-4">
                 <div>
@@ -270,9 +281,9 @@
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Data Limite</label>
                     <input type="date" id="edit-deadline" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
                 </div>
-                <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
-                    <button type="button" onclick="fecharModalEdicao()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors">Cancelar</button>
-                    <button type="submit" class="bg-[#533ABF] hover:bg-[#422e99] text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-sm">Salvar Alterações</button>
+                <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="fecharModalEdicao()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors w-full md:w-auto">Cancelar</button>
+                    <button type="submit" class="bg-[#533ABF] hover:bg-[#422e99] text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-sm w-full md:w-auto">Salvar</button>
                 </div>
             </form>
         </div>
@@ -290,9 +301,23 @@
         let chartInstance = null;
         let editingTaskId = null;
 
+        // CONTROLE DO MENU MOBILE (Novo)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            
+            // Alterna a classe de translação (gaveta entra/sai)
+            sidebar.classList.toggle('-translate-x-full');
+            
+            if(sidebar.classList.contains('-translate-x-full')) {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
+            }
+        }
+
         // Escuta e Monitoria de Autenticação
         crmBanco.auth.onAuthStateChange((event, session) => {
-            // DETECTA SE O USUÁRIO CLICOU NO LINK DE RECUPERAÇÃO DO EMAIL
             if (event === "PASSWORD_RECOVERY") {
                 const novaSenha = prompt("Crie a sua nova senha de acesso:");
                 if (novaSenha) {
@@ -304,16 +329,17 @@
             }
 
             const app = document.getElementById('app-screen');
-            // Só libera a tela inicial se tiver sessão e NÃO for um evento de recuperação pendente
             if (session && event !== "PASSWORD_RECOVERY") {
                 document.getElementById('login-screen').classList.add('hidden');
                 app.classList.remove('hidden');
+                app.classList.add('flex');
                 setTimeout(() => app.classList.remove('opacity-0'), 50);
                 document.getElementById('user-display').innerText = `CONECTADO: ${session.user.email}`;
                 sincronizarDados();
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 app.classList.add('hidden', 'opacity-0');
+                app.classList.remove('flex');
             }
         });
 
@@ -338,7 +364,6 @@
                 return;
             }
 
-            // Envia o link para o e-mail redirecionando automaticamente para a origem atual (Local ou Vercel)
             const { error } = await crmBanco.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.origin, 
             });
@@ -363,6 +388,9 @@
             targetTab.classList.remove('hidden');
             document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white";
             
+            // Fecha o menu no Mobile automaticamente após clicar numa aba
+            if(window.innerWidth < 768) { toggleSidebar(); }
+
             if (tabName === 'calendar' && fullCalendarInstance) setTimeout(() => fullCalendarInstance.render(), 50);
             if (tabName === 'summary') processarFiltrosERelatorios();
         }
@@ -465,12 +493,12 @@
                 const badge = t.status === 'todo' ? '🔴 Pendente' : '🟡 Em Andamento';
                 const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
                 tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50/50 transition-colors">
+                    <tr class="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
                         <td class="p-3 font-medium text-gray-800">${t.cliente}</td>
                         <td class="p-3 text-gray-500">${t.descricao}</td>
                         <td class="p-3 text-gray-500">👤 ${t.responsavel}</td>
                         <td class="p-3 font-mono font-medium text-red-500">${dt}</td>
-                        <td class="p-3 text-[10px]">${badge}</td>
+                        <td class="p-3 text-[10px] whitespace-nowrap">${badge}</td>
                     </tr>`;
             });
         }
@@ -487,30 +515,30 @@
                 
                 let controlButtons = '';
                 if (t.status === 'todo') {
-                    controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer">Iniciar 👉</button></div>`;
+                    controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer w-full md:w-auto mt-2 md:mt-0">Iniciar 👉</button></div>`;
                 } else if (t.status === 'doing') {
                     controlButtons = `
-                        <div class="w-full flex justify-between items-center">
-                            <button onclick="moverTarefa(${t.id}, 'todo')" class="text-[10px] text-gray-400 hover:text-red-500 transition-colors cursor-pointer">👈 Retornar</button>
-                            <button onclick="moverTarefa(${t.id}, 'done')" class="text-[10px] bg-green-600 text-white px-3 py-1 rounded-lg font-medium hover:bg-green-700 transition-colors cursor-pointer">Concluir ✔️</button>
+                        <div class="w-full flex flex-col md:flex-row justify-between items-center gap-2 mt-2 md:mt-0">
+                            <button onclick="moverTarefa(${t.id}, 'todo')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-red-500 px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer">👈 Retornar</button>
+                            <button onclick="moverTarefa(${t.id}, 'done')" class="text-[10px] bg-green-600 text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-green-700 w-full md:w-auto transition-colors cursor-pointer">Concluir ✔️</button>
                         </div>`;
                 } else if (t.status === 'done') {
-                    controlButtons = `<div class="w-full flex justify-start"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] text-gray-400 hover:text-[#533ABF] transition-colors cursor-pointer">↺ Reabrir Demanda</button></div>`;
+                    controlButtons = `<div class="w-full flex justify-start"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-[#533ABF] px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer mt-2 md:mt-0">↺ Reabrir Demanda</button></div>`;
                 }
 
                 cols[t.status].innerHTML += `
                     <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md space-y-2.5">
                         <div class="flex justify-between items-start">
-                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[140px]">${t.cliente}</h5>
-                            <div class="flex gap-2">
-                                <button onclick="abrirModalEdicao(${t.id})" class="text-gray-300 hover:text-[#533ABF] text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
-                                <button onclick="deletarTarefa(${t.id})" class="text-gray-300 hover:text-red-500 text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
+                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[200px] md:max-w-[140px]">${t.cliente}</h5>
+                            <div class="flex gap-3 md:gap-2">
+                                <button onclick="abrirModalEdicao(${t.id})" class="text-gray-400 hover:text-[#533ABF] text-[12px] md:text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
+                                <button onclick="deletarTarefa(${t.id})" class="text-gray-400 hover:text-red-500 text-[12px] md:text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
                             </div>
                         </div>
                         <p class="text-[11px] text-gray-500 line-clamp-2">${t.descricao}</p>
-                        <div class="text-[9px] text-gray-400 font-medium">Prazo: <span class="font-mono text-gray-600">${dt}</span></div>
-                        <div class="pt-2 border-t border-gray-50 flex flex-col gap-2">
-                            <div class="text-[9px] text-gray-400">👤 ${t.responsavel}</div>
+                        <div class="text-[9px] text-gray-400 font-medium border-b border-gray-50 pb-2">Prazo: <span class="font-mono text-gray-600">${dt}</span></div>
+                        <div class="pt-1 flex flex-col gap-2">
+                            <div class="text-[10px] md:text-[9px] text-gray-500">👤 ${t.responsavel}</div>
                             ${controlButtons}
                         </div>
                     </div>`;
@@ -550,12 +578,12 @@
                 const badge = t.status === 'todo' ? 'bg-red-50 text-red-600' : t.status === 'doing' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600';
                 const txt = t.status === 'todo' ? 'Pendente' : t.status === 'doing' ? 'Em Andamento' : 'Concluído';
                 list.innerHTML += `
-                    <div class="py-2.5 flex justify-between items-center text-xs">
+                    <div class="py-3 flex flex-col md:flex-row md:justify-between md:items-center text-xs gap-2">
                         <div>
-                            <p class="font-medium text-gray-800">${t.cliente} <span class="text-gray-400 font-normal">- ${t.descricao}</span></p>
-                            <p class="text-[10px] text-gray-400">Responsável: ${t.responsavel}</p>
+                            <p class="font-medium text-gray-800">${t.cliente} <span class="text-gray-400 font-normal hidden md:inline">- ${t.descricao}</span></p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">Responsável: ${t.responsavel}</p>
                         </div>
-                        <span class="px-2 py-0.5 rounded-md font-medium text-[9px] ${badge}">${txt}</span>
+                        <span class="px-2 py-1 md:py-0.5 rounded-md font-medium text-[10px] md:text-[9px] w-max ${badge}">${txt}</span>
                     </div>`;
             });
 
@@ -564,14 +592,14 @@
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Pendente', 'Em Andamento', 'Concluído'],
+                    labels: ['Pendente', 'Andamento', 'Concluído'],
                     datasets: [{
                         data: [chData.todo, chData.doing, chData.done],
                         backgroundColor: ['#EF4444', '#F59E0B', '#10B981'],
                         borderWidth: 0
                     }]
                 },
-                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9 } } } } }
+                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
             });
         }
 
@@ -596,10 +624,14 @@
             if (fullCalendarInstance) fullCalendarInstance.destroy();
 
             fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
+                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth', // Usa lista no mobile para não quebrar
                 locale: 'pt-br',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
-                buttonText: { today: 'Hoje' },
+                headerToolbar: { 
+                    left: 'prev,next', 
+                    center: 'title', 
+                    right: window.innerWidth < 768 ? '' : 'dayGridMonth,listMonth' 
+                },
+                buttonText: { today: 'Hoje', list: 'Lista', month: 'Mês' },
                 events: eventosMap,
                 eventClick: function(info) { abrirDetalhesNoDrawer(info.event.extendedProps); }
             });
@@ -631,6 +663,13 @@
             }
             toggleDrawer(true);
         }
+
+        // Re-renderiza o calendário ao redimensionar a tela para ajustar de Grid para Lista
+        window.addEventListener('resize', () => {
+            if(!document.getElementById('tab-calendar').classList.contains('hidden')) {
+                renderizarCalendario();
+            }
+        });
     </script>
 </body>
 </html>
