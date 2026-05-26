@@ -556,7 +556,7 @@
             fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 locale: 'pt-br',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth' },
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth', 'dayGridWeek' },
                 buttonText: { today: 'Hoje' },
                 events: eventosMap,
                 eventClick: function(info) { abrirDetalhesNoDrawer(info.event.extendedProps); }
