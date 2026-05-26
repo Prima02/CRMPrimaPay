@@ -648,7 +648,7 @@
 
             const userFilter = document.getElementById('calendar-filter-user').value.toLowerCase().trim();
 
-            const eventos Mapeados = todasAtividades
+            const eventosMapeados = todasAtividades
                 .filter(t => {
                     if (!t.data_limite) return false;
                     if (userFilter && (!t.responsavel || !t.responsavel.toLowerCase().includes(userFilter))) return false;
