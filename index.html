@@ -39,8 +39,15 @@
                 </div>
                 <div>
                     <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Senha</label>
-                    <input type="password" id="login-password" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-3 bg-gray-50/50 focus:outline-none focus:border-[#533ABF] transition-colors text-sm">
+                    <input type="password" id="login-password" class="mt-1.5 block w-full rounded-xl border border-gray-200 p-3 bg-gray-50/50 focus:outline-none focus:border-[#533ABF] transition-colors text-sm">
                 </div>
+                
+                <div class="text-right mt-1">
+                    <button type="button" id="btn-esqueci-senha" class="text-[11px] text-[#533ABF] hover:underline cursor-pointer font-semibold">
+                        Esqueci minha senha
+                    </button>
+                </div>
+
                 <button type="submit" class="w-full bg-[#533ABF] text-[#FEFEFE] p-3 rounded-xl hover:bg-[#422e99] active:scale-[0.99] transition-all font-semibold shadow-md cursor-pointer mt-2">Entrar</button>
             </form>
         </div>
@@ -230,9 +237,9 @@
                         <div class="space-y-4 text-xs">
                             <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Cliente / Empresa</span><p id="drawer-client" class="text-sm font-semibold text-gray-800 mt-0.5"></p></div>
                             <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Atividade</span><p id="drawer-desc" class="text-gray-600 mt-0.5"></p></div>
-                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Responsável da Equipe</span><p id="drawer-assignee" class="font-medium text-gray-700 mt-0.5"></p></div>
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Responsável</span><p id="drawer-assignee" class="font-medium text-gray-700 mt-0.5"></p></div>
                             <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Data Limite</span><p id="drawer-deadline" class="font-mono text-gray-700 mt-0.5"></p></div>
-                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Situação Atual</span><span id="drawer-status" class="inline-block mt-1 px-3 py-1 rounded-full font-bold text-[10px]"></span></div>
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Situação</span><span id="drawer-status" class="inline-block mt-1 px-3 py-1 rounded-full font-bold text-[10px]"></span></div>
                         </div>
                     </div>
                 </div>
@@ -281,12 +288,24 @@
         let todasAtividades = [];
         let fullCalendarInstance = null;
         let chartInstance = null;
-        let editingTaskId = null; // Guarda ID da tarefa em alteração
+        let editingTaskId = null;
 
         // Escuta e Monitoria de Autenticação
         crmBanco.auth.onAuthStateChange((event, session) => {
+            // DETECTA SE O USUÁRIO CLICOU NO LINK DE RECUPERAÇÃO DO EMAIL
+            if (event === "PASSWORD_RECOVERY") {
+                const novaSenha = prompt("Crie a sua nova senha de acesso:");
+                if (novaSenha) {
+                    crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => {
+                        if (error) alert("Erro ao atualizar senha: " + error.message);
+                        else alert("Senha atualizada com sucesso! Por favor, faça o login com a nova senha.");
+                    });
+                }
+            }
+
             const app = document.getElementById('app-screen');
-            if (session) {
+            // Só libera a tela inicial se tiver sessão e NÃO for um evento de recuperação pendente
+            if (session && event !== "PASSWORD_RECOVERY") {
                 document.getElementById('login-screen').classList.add('hidden');
                 app.classList.remove('hidden');
                 setTimeout(() => app.classList.remove('opacity-0'), 50);
@@ -303,57 +322,35 @@
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
-            <div>
-    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Senha</label>
-    <input type="password" id="login-password" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-3 bg-gray-50/50 focus:outline-none focus:border-[#533ABF] transition-colors text-sm">
-</div>
+            
+            if(!password) { alert("Digite a senha para entrar."); return; }
 
-<div class="text-right mt-1">
-    <button type="button" id="btn-esqueci-senha" class="text-xs text-[#533ABF] hover:underline cursor-pointer">
-        Esqueci minha senha
-    </button>
-</div>
-
-<button type="submit" class="w-full bg-[#533ABF] text-[#FEFEFE] p-3 rounded-xl hover:bg-[#422e99] active:scale-[0.99] transition-all font-semibold shadow-md cursor-pointer mt-4">Entrar</button>
             const { error } = await crmBanco.auth.signInWithPassword({ email, password });
             if (error) alert("Erro: " + error.message);
         });
 
-        document.getElementById('logout-btn').addEventListener('click', async () => { await crmBanco.auth.signOut(); });
-        // LÓGICA PARA RECUPERAÇÃO DE SENHA
-document.getElementById('btn-esqueci-senha').addEventListener('click', async () => {
-    // Pega o e-mail que o usuário já digitou no campo de login
-    const email = document.getElementById('login-email').value.trim();
+        // RECUPERAÇÃO DE SENHA (ESQUECI MINHA SENHA)
+        document.getElementById('btn-esqueci-senha').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value.trim();
+            
+            if (!email) {
+                alert("Por favor, digite o seu e-mail no campo acima antes de clicar em 'Esqueci minha senha'.");
+                return;
+            }
 
-    if (!email) {
-        alert("Por favor, digite o seu e-mail no campo acima antes de clicar em esqueci minha senha.");
-        return;
-    }
-
-    // Dispara a redefinição de senha para o Supabase
-    const { data, error } = await crmBanco.auth.resetPasswordForEmail(email, {
-        // MUITO IMPORTANTE: Substitua pelo link real do seu site publicado na Vercel
-        redirectTo: 'https://seu-app-primapay.vercel.app', 
-    });
-
-    if (error) {
-        alert("Erro ao enviar e-mail de recuperação: " + error.message);
-    } else {
-        alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada.");
-    }
-});
-        // Detecta se o usuário veio pelo link de redefinição de senha
-crmBanco.auth.onAuthStateChange((event, session) => {
-    if (event === "PASSWORD_RECOVERY") {
-        const novaSenha = prompt("Digite a sua nova senha:");
-        if (novaSenha) {
-            crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => {
-                if (error) alert("Erro ao atualizar senha: " + error.message);
-                else alert("Senha atualizada com sucesso! Agora você já pode fazer login.");
+            // Envia o link para o e-mail redirecionando automaticamente para a origem atual (Local ou Vercel)
+            const { error } = await crmBanco.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin, 
             });
-        }
-    }
-});
+
+            if (error) {
+                alert("Erro ao solicitar redefinição: " + error.message);
+            } else {
+                alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada ou aba de spam.");
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async () => { await crmBanco.auth.signOut(); });
 
         // Controle do Sistema de Abas Animado
         function switchTab(tabName) {
@@ -383,7 +380,7 @@ crmBanco.auth.onAuthStateChange((event, session) => {
             else { document.getElementById('task-form').reset(); sincronizarDados(); }
         });
 
-        // Atualizar Status (Mudança Bidirecional Suportada)
+        // Atualizar Status
         async function moverTarefa(id, novoStatus) {
             await crmBanco.from('tarefas').update({ status: novoStatus }).eq('id', id);
             sincronizarDados();
@@ -397,7 +394,7 @@ crmBanco.auth.onAuthStateChange((event, session) => {
             }
         }
 
-        // --- SISTEMA INTERNO DE EDIÇÃO (NOVO) ---
+        // --- SISTEMA INTERNO DE EDIÇÃO ---
         function abrirModalEdicao(id) {
             const tarefa = todasAtividades.find(t => t.id === id);
             if (!tarefa) return;
@@ -439,7 +436,7 @@ crmBanco.auth.onAuthStateChange((event, session) => {
         });
         // ----------------------------------------
 
-        // Pipeline Integrado de Sincronização
+        // Sincronização
         async function sincronizarDados() {
             const { data, error } = await crmBanco.from('tarefas').select('*').order('data_limite', { ascending: true });
             if (error) return;
@@ -478,7 +475,7 @@ crmBanco.auth.onAuthStateChange((event, session) => {
             });
         }
 
-        // Render: Kanban (Com Botões Bidirecionais e Edição)
+        // Render: Kanban
         function renderizarKanban() {
             const cols = { todo: document.getElementById('col-todo'), doing: document.getElementById('col-doing'), done: document.getElementById('col-done') };
             Object.values(cols).forEach(col => col.innerHTML = '');
@@ -488,7 +485,6 @@ crmBanco.auth.onAuthStateChange((event, session) => {
                 counts[t.status]++;
                 const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
                 
-                // Criação Dinâmica dos Controles Avançados do Fluxo Minimalista
                 let controlButtons = '';
                 if (t.status === 'todo') {
                     controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer">Iniciar 👉</button></div>`;
