@@ -303,11 +303,57 @@
             e.preventDefault();
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
+            <div>
+    <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400">Senha</label>
+    <input type="password" id="login-password" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-3 bg-gray-50/50 focus:outline-none focus:border-[#533ABF] transition-colors text-sm">
+</div>
+
+<div class="text-right mt-1">
+    <button type="button" id="btn-esqueci-senha" class="text-xs text-[#533ABF] hover:underline cursor-pointer">
+        Esqueci minha senha
+    </button>
+</div>
+
+<button type="submit" class="w-full bg-[#533ABF] text-[#FEFEFE] p-3 rounded-xl hover:bg-[#422e99] active:scale-[0.99] transition-all font-semibold shadow-md cursor-pointer mt-4">Entrar</button>
             const { error } = await crmBanco.auth.signInWithPassword({ email, password });
             if (error) alert("Erro: " + error.message);
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => { await crmBanco.auth.signOut(); });
+        // LÓGICA PARA RECUPERAÇÃO DE SENHA
+document.getElementById('btn-esqueci-senha').addEventListener('click', async () => {
+    // Pega o e-mail que o usuário já digitou no campo de login
+    const email = document.getElementById('login-email').value.trim();
+
+    if (!email) {
+        alert("Por favor, digite o seu e-mail no campo acima antes de clicar em esqueci minha senha.");
+        return;
+    }
+
+    // Dispara a redefinição de senha para o Supabase
+    const { data, error } = await crmBanco.auth.resetPasswordForEmail(email, {
+        // MUITO IMPORTANTE: Substitua pelo link real do seu site publicado na Vercel
+        redirectTo: 'https://seu-app-primapay.vercel.app', 
+    });
+
+    if (error) {
+        alert("Erro ao enviar e-mail de recuperação: " + error.message);
+    } else {
+        alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada.");
+    }
+});
+        // Detecta se o usuário veio pelo link de redefinição de senha
+crmBanco.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") {
+        const novaSenha = prompt("Digite a sua nova senha:");
+        if (novaSenha) {
+            crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => {
+                if (error) alert("Erro ao atualizar senha: " + error.message);
+                else alert("Senha atualizada com sucesso! Agora você já pode fazer login.");
+            });
+        }
+    }
+});
 
         // Controle do Sistema de Abas Animado
         function switchTab(tabName) {
