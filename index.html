@@ -26,6 +26,8 @@
 </head>
 <body class="bg-[#FEFEFE] font-sans min-h-screen antialiased text-gray-800 flex flex-col justify-between overflow-x-hidden">
 
+    <div id="toast-container" class="fixed top-5 right-5 z-[100] flex flex-col gap-3 pointer-events-none"></div>
+
     <div id="login-screen" class="flex items-center justify-center min-h-screen bg-[#533ABF] transition-all duration-500 p-4">
         <div class="bg-[#FEFEFE] p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-4 border-[#E424C8] transform transition-transform duration-500 hover:scale-[1.01]">
             <div class="flex justify-center mb-6">
@@ -301,12 +303,59 @@
         let chartInstance = null;
         let editingTaskId = null;
 
-        // CONTROLE DO MENU MOBILE (Novo)
+        // 1. SISTEMA VISUAL DE NOTIFICAÇÕES (TOASTS)
+        function mostrarNotificacao(mensagem, tipo = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-white border-l-4 border-[#533ABF]';
+            let icone = '🔔';
+            
+            if(tipo === 'sucesso') { bgClass = 'bg-white border-l-4 border-green-500'; icone = '✅'; }
+            if(tipo === 'aviso') { bgClass = 'bg-white border-l-4 border-yellow-500'; icone = '🔄'; }
+            if(tipo === 'erro') { bgClass = 'bg-white border-l-4 border-red-500'; icone = '🗑️'; }
+
+            toast.className = `${bgClass} text-gray-700 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0 w-max max-w-xs pointer-events-auto text-xs font-semibold`;
+            toast.innerHTML = `<span class="text-lg">${icone}</span> <span>${mensagem}</span>`;
+            
+            container.appendChild(toast);
+
+            setTimeout(() => { toast.classList.remove('translate-x-full', 'opacity-0'); }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // 2. ESCUTA EM TEMPO REAL DO SUPABASE (REALTIME)
+        crmBanco
+          .channel('tarefas-realtime')
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'tarefas' },
+            (payload) => {
+              if (payload.eventType === 'INSERT') {
+                  mostrarNotificacao(`Nova demanda: ${payload.new.cliente}`, 'info');
+              } else if (payload.eventType === 'UPDATE') {
+                  if(payload.old && payload.new.status !== payload.old.status) {
+                      mostrarNotificacao(`${payload.new.cliente} mudou de fase!`, 'sucesso');
+                  } else {
+                      mostrarNotificacao(`${payload.new.cliente} foi atualizada.`, 'aviso');
+                  }
+              } else if (payload.eventType === 'DELETE') {
+                  mostrarNotificacao(`Uma tarefa foi apagada.`, 'erro');
+              }
+              sincronizarDados();
+            }
+          )
+          .subscribe();
+
+        // CONTROLE DO MENU MOBILE
         function toggleSidebar() {
             const sidebar = document.getElementById('main-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
             
-            // Alterna a classe de translação (gaveta entra/sai)
             sidebar.classList.toggle('-translate-x-full');
             
             if(sidebar.classList.contains('-translate-x-full')) {
@@ -322,8 +371,8 @@
                 const novaSenha = prompt("Crie a sua nova senha de acesso:");
                 if (novaSenha) {
                     crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => {
-                        if (error) alert("Erro ao atualizar senha: " + error.message);
-                        else alert("Senha atualizada com sucesso! Por favor, faça o login com a nova senha.");
+                        if (error) mostrarNotificacao("Erro ao atualizar senha: " + error.message, 'erro');
+                        else mostrarNotificacao("Senha atualizada com sucesso!", 'sucesso');
                     });
                 }
             }
@@ -355,7 +404,7 @@
             if (error) alert("Erro: " + error.message);
         });
 
-        // RECUPERAÇÃO DE SENHA (ESQUECI MINHA SENHA)
+        // RECUPERAÇÃO DE SENHA
         document.getElementById('btn-esqueci-senha').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim();
             
@@ -369,9 +418,9 @@
             });
 
             if (error) {
-                alert("Erro ao solicitar redefinição: " + error.message);
+                mostrarNotificacao("Erro ao solicitar redefinição: " + error.message, 'erro');
             } else {
-                alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada ou aba de spam.");
+                alert("E-mail de redefinição enviado com sucesso!");
             }
         });
 
@@ -388,7 +437,6 @@
             targetTab.classList.remove('hidden');
             document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white";
             
-            // Fecha o menu no Mobile automaticamente após clicar numa aba
             if(window.innerWidth < 768) { toggleSidebar(); }
 
             if (tabName === 'calendar' && fullCalendarInstance) setTimeout(() => fullCalendarInstance.render(), 50);
@@ -404,25 +452,23 @@
             const data_limite = document.getElementById('task-deadline').value;
 
             const { error } = await crmBanco.from('tarefas').insert([{ cliente, descricao, responsavel, data_limite, status: 'todo' }]);
-            if (error) alert(error.message);
-            else { document.getElementById('task-form').reset(); sincronizarDados(); }
+            if (error) mostrarNotificacao(error.message, 'erro');
+            else { document.getElementById('task-form').reset(); }
         });
 
         // Atualizar Status
         async function moverTarefa(id, novoStatus) {
             await crmBanco.from('tarefas').update({ status: novoStatus }).eq('id', id);
-            sincronizarDados();
         }
 
         // Deletar Registro
         async function deletarTarefa(id) {
             if(confirm("Deseja apagar permanentemente?")) {
                 await crmBanco.from('tarefas').delete().eq('id', id);
-                sincronizarDados();
             }
         }
 
-        // --- SISTEMA INTERNO DE EDIÇÃO ---
+        // MODAL DE EDIÇÃO
         function abrirModalEdicao(id) {
             const tarefa = todasAtividades.find(t => t.id === id);
             if (!tarefa) return;
@@ -459,12 +505,11 @@
 
             const { error } = await crmBanco.from('tarefas').update({ cliente, descricao, responsavel, data_limite }).eq('id', editingTaskId);
             
-            if (error) alert("Erro na atualização: " + error.message);
-            else { fecharModalEdicao(); sincronizarDados(); }
+            if (error) mostrarNotificacao("Erro na atualização: " + error.message, 'erro');
+            else { fecharModalEdicao(); }
         });
-        // ----------------------------------------
 
-        // Sincronização
+        // Sincronização Local e Renderers
         async function sincronizarDados() {
             const { data, error } = await crmBanco.from('tarefas').select('*').order('data_limite', { ascending: true });
             if (error) return;
@@ -624,7 +669,7 @@
             if (fullCalendarInstance) fullCalendarInstance.destroy();
 
             fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
-                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth', // Usa lista no mobile para não quebrar
+                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth',
                 locale: 'pt-br',
                 headerToolbar: { 
                     left: 'prev,next', 
@@ -664,7 +709,6 @@
             toggleDrawer(true);
         }
 
-        // Re-renderiza o calendário ao redimensionar a tela para ajustar de Grid para Lista
         window.addEventListener('resize', () => {
             if(!document.getElementById('tab-calendar').classList.contains('hidden')) {
                 renderizarCalendario();
