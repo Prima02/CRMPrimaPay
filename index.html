@@ -186,17 +186,26 @@
                 </section>
             </div>
 
-            <div id="tab-ideas" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 tab-animate">
+            <div id="tab-ideas" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 tab-animate relative">
                 <div class="flex flex-col gap-1">
                     <h2 class="text-xl font-bold text-gray-900">💡 Banco de Ideias</h2>
-                    <p class="text-xs text-gray-400">Registre, edite e gerencie novos insights e ideias criativas.</p>
+                    <p class="text-xs text-gray-400">Registre, filtre e gerencie novos insights e ideias criativas.</p>
                 </div>
                 
                 <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <form id="idea-form" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <form id="idea-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                         <div class="md:col-span-1">
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Título / Assunto</label>
                             <input type="text" id="idea-title" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Tipo de Conteúdo</label>
+                            <select id="idea-type" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
+                                <option value="Reels">🎬 Reels</option>
+                                <option value="Story">📸 Story</option>
+                                <option value="Links">🔗 Links</option>
+                                <option value="Posts">📝 Posts</option>
+                            </select>
                         </div>
                         <div class="md:col-span-2">
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Descrição da Ideia / Insight</label>
@@ -207,9 +216,42 @@
                 </section>
 
                 <section class="bg-gray-100/50 p-4 rounded-2xl min-h-[300px]">
-                    <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 mb-4 flex justify-between items-center px-1">💡 Insights Guardados <span id="count-ideas" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4 px-1">
+                        <h4 class="font-medium text-xs uppercase tracking-wider text-gray-500 flex items-center gap-2">💡 Insights Guardados <span id="count-ideas" class="bg-white text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-bold border border-gray-200/60">0</span></h4>
+                        
+                        <div class="flex flex-wrap gap-1.5">
+                            <button onclick="filtrarIdeias('all')" id="btn-filter-idea-all" class="px-3 py-1.5 bg-[#533ABF] text-white rounded-xl text-xs font-medium cursor-pointer transition-all shadow-sm">Todos</button>
+                            <button onclick="filtrarIdeias('Reels')" id="btn-filter-idea-Reels" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs font-medium cursor-pointer transition-all hover:bg-gray-50">Reels</button>
+                            <button onclick="filtrarIdeias('Story')" id="btn-filter-idea-Story" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs font-medium cursor-pointer transition-all hover:bg-gray-50">Story</button>
+                            <button onclick="filtrarIdeias('Links')" id="btn-filter-idea-Links" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs font-medium cursor-pointer transition-all hover:bg-gray-50">Links</button>
+                            <button onclick="filtrarIdeias('Posts')" id="btn-filter-idea-Posts" class="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs font-medium cursor-pointer transition-all hover:bg-gray-50">Posts</button>
+                        </div>
+                    </div>
                     <div id="container-ideas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </section>
+
+                <div id="idea-drawer" class="fixed top-0 right-0 h-full w-full sm:w-85 bg-white shadow-2xl border-l z-[60] transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-5">
+                            <h3 class="font-bold text-sm text-[#533ABF] flex items-center gap-2">💡 Detalhes do Insight</h3>
+                            <button onclick="toggleIdeaDrawer(false)" class="text-gray-400 hover:text-gray-600 text-lg cursor-pointer">✕</button>
+                        </div>
+                        <div class="space-y-5 text-xs">
+                            <div>
+                                <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Título / Assunto</span>
+                                <p id="drawer-idea-title" class="text-sm font-semibold text-gray-800 mt-1"></p>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Formato de Produção</span>
+                                <span id="drawer-idea-type" class="inline-block mt-1.5 px-2 py-0.5 rounded-md font-bold text-[10px]"></span>
+                            </div>
+                            <div>
+                                <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Descrição / Conteúdo Integral</span>
+                                <p id="drawer-idea-desc" class="text-gray-600 mt-1 text-sm leading-relaxed bg-gray-50 p-3.5 rounded-xl border border-gray-100 whitespace-pre-line"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="tab-summary" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 tab-animate">
@@ -332,6 +374,15 @@
                     <input type="text" id="edit-idea-title" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
                 </div>
                 <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Tipo de Conteúdo</label>
+                    <select id="edit-idea-type" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
+                        <option value="Reels">🎬 Reels</option>
+                        <option value="Story">📸 Story</option>
+                        <option value="Links">🔗 Links</option>
+                        <option value="Posts">📝 Posts</option>
+                    </select>
+                </div>
+                <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Descrição / Insight</label>
                     <textarea id="edit-idea-desc" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none h-24 resize-none"></textarea>
                 </div>
@@ -351,11 +402,12 @@
         const crmBanco = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let todasAtividades = [];
-        let todasIdeias = []; // Nova variável estrutural
+        let todasIdeias = []; 
+        let filtroIdeiaAtual = 'all'; // Nova variável global de controle de filtros de ideias
         let fullCalendarInstance = null;
         let chartInstance = null;
         let editingTaskId = null;
-        let editingIdeaId = null; // Nova variável estrutural
+        let editingIdeaId = null; 
 
         // CONTROLE DO MENU MOBILE
         function toggleSidebar() {
@@ -377,7 +429,7 @@
                 if (novaSenha) {
                     crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => {
                         if (error) alert("Erro ao atualizar senha: " + error.message);
-                        else alert("Senha updated com sucesso! Por favor, faça o login com a nova senha.");
+                        else alert("Senha atualizada com sucesso! Por favor, faça o login com a nova senha.");
                     });
                 }
             }
@@ -390,7 +442,7 @@
                 setTimeout(() => app.classList.remove('opacity-0'), 50);
                 document.getElementById('user-display').innerText = `CONECTADO: ${session.user.email}`;
                 sincronizarDados();
-                sincronizarIdeias(); // Sincroniza as ideias no login
+                sincronizarIdeias(); 
             } else {
                 document.getElementById('login-screen').classList.remove('hidden');
                 app.classList.add('hidden', 'opacity-0');
@@ -593,13 +645,14 @@
             document.getElementById('count-done').innerText = counts.done;
         }
 
-        // --- SISTEMA INTERNO CRUDS PARA IDEIAS (NOVO) ---
+        // --- INTERAÇÕES DO BANCO DE IDEIAS (ATUALIZADO) ---
         document.getElementById('idea-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const titulo = document.getElementById('idea-title').value.trim();
+            const tipo = document.getElementById('idea-type').value;
             const descricao = document.getElementById('idea-desc').value.trim();
 
-            const { error } = await crmBanco.from('ideias').insert([{ titulo, descricao }]);
+            const { error } = await crmBanco.from('ideias').insert([{ titulo, tipo, descricao }]);
             if (error) alert("Erro ao salvar ideia: " + error.message);
             else { 
                 document.getElementById('idea-form').reset(); 
@@ -614,36 +667,94 @@
             renderizarIdeias();
         }
 
+        // Função de Acionamento dos Filtros de Ideias
+        function filtrarIdeias(tipo) {
+            filtroIdeaAtual = tipo;
+            ['all', 'Reels', 'Story', 'Links', 'Posts'].forEach(t => {
+                const btn = document.getElementById(`btn-filter-idea-${t}`);
+                if (t === tipo) {
+                    btn.className = "px-3 py-1.5 bg-[#533ABF] text-white rounded-xl text-xs font-medium cursor-pointer transition-all shadow-sm";
+                } else {
+                    btn.className = "px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-xl text-xs font-medium cursor-pointer transition-all hover:bg-gray-50";
+                }
+            });
+            renderizarIdeias();
+        }
+
         function renderizarIdeias() {
             const container = document.getElementById('container-ideas');
             container.innerHTML = '';
-            document.getElementById('count-ideas').innerText = todasIdeias.length;
+            
+            // Filtra os conteúdos baseado na seleção ativa
+            const ideiasFiltradas = todasIdeias.filter(i => filtroIdeaAtual === 'all' || i.tipo === filtroIdeaAtual);
+            document.getElementById('count-ideas').innerText = ideiasFiltradas.length;
 
-            if (todasIdeias.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-xs italic p-4 col-span-full text-center">Nenhuma ideia anotada até o momento.</p>';
+            if (ideiasFiltradas.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-xs italic p-4 col-span-full text-center">Nenhum insight correspondente para o filtro selecionado.</p>';
                 return;
             }
 
-            todasIdeias.forEach(i => {
+            ideiasFiltradas.forEach(i => {
+                // Criação inteligente de tags coloridas com base no tipo
+                let tipoBadge = '';
+                if(i.tipo === 'Reels') tipoBadge = '<span class="text-[9px] px-1.5 py-0.5 font-bold rounded-md bg-pink-50 text-pink-600 border border-pink-100">🎬 Reels</span>';
+                else if(i.tipo === 'Story') tipoBadge = '<span class="text-[9px] px-1.5 py-0.5 font-bold rounded-md bg-orange-50 text-orange-600 border border-orange-100">📸 Story</span>';
+                else if(i.tipo === 'Links') tipoBadge = '<span class="text-[9px] px-1.5 py-0.5 font-bold rounded-md bg-blue-50 text-blue-600 border border-blue-100">🔗 Links</span>';
+                else if(i.tipo === 'Posts') tipoBadge = '<span class="text-[9px] px-1.5 py-0.5 font-bold rounded-md bg-green-50 text-green-600 border border-green-100">📝 Posts</span>';
+                else tipoBadge = `<span class="text-[9px] px-1.5 py-0.5 font-bold rounded-md bg-gray-50 text-gray-600 border border-gray-100">${i.tipo || 'Geral'}</span>`;
+
                 container.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md space-y-2.5">
+                    <div onclick="abrirDrawerIdeia(${i.id})" class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md hover:scale-[1.01] cursor-pointer space-y-2.5">
                         <div class="flex justify-between items-start">
-                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[180px]">${i.titulo}</h5>
+                            <div class="flex flex-col gap-1 max-w-[180px]">
+                                <h5 class="font-semibold text-xs text-gray-800 truncate">${i.titulo}</h5>
+                                <div class="mt-0.5">${tipoBadge}</div>
+                            </div>
                             <div class="flex gap-3 md:gap-2">
-                                <button onclick="abrirModalEdicaoIdeia(${i.id})" class="text-gray-400 hover:text-[#533ABF] text-[12px] md:text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
-                                <button onclick="deletarIdeia(${i.id})" class="text-gray-400 hover:text-red-500 text-[12px] md:text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
+                                <button onclick="event.stopPropagation(); abrirModalEdicaoIdeia(${i.id})" class="text-gray-400 hover:text-[#533ABF] text-[12px] md:text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
+                                <button onclick="event.stopPropagation(); deletarIdeia(${i.id})" class="text-gray-400 hover:text-red-500 text-[12px] md:text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
                             </div>
                         </div>
-                        <p class="text-[11px] text-gray-500 whitespace-pre-line">${i.descricao}</p>
+                        <p class="text-[11px] text-gray-500 line-clamp-3 whitespace-pre-line">${i.descricao}</p>
                     </div>`;
             });
+        }
+
+        // Sistema de Controle de Gaveta (Drawer) Lateral para Ideias
+        function toggleIdeaDrawer(open) {
+            const drawer = document.getElementById('idea-drawer');
+            if (open) drawer.classList.remove('translate-x-full');
+            else drawer.classList.add('translate-x-full');
+        }
+
+        function abrirDrawerIdeia(id) {
+            const ideia = todasIdeias.find(t => t.id === id);
+            if (!ideia) return;
+
+            document.getElementById('drawer-idea-title').innerText = ideia.titulo;
+            document.getElementById('drawer-idea-desc').innerText = ideia.descricao;
+            
+            const tipoEl = document.getElementById('drawer-idea-type');
+            tipoEl.innerText = ideia.tipo || 'Geral';
+
+            // Estilização das tags dinâmicas dentro da gaveta lateral
+            if(ideia.tipo === 'Reels') tipoEl.className = 'inline-block mt-1.5 px-2 py-0.5 rounded-md font-bold text-[10px] bg-pink-50 text-pink-700 border border-pink-100';
+            else if(ideia.tipo === 'Story') tipoEl.className = 'inline-block mt-1.5 px-2 py-0.5 rounded-md font-bold text-[10px] bg-orange-50 text-orange-700 border border-orange-100';
+            else if(ideia.tipo === 'Links') tipoEl.className = 'inline-block mt-1.5 px-2 py-0.5 rounded-md font-bold text-[10px] bg-blue-50 text-blue-700 border border-blue-100';
+            else if(ideia.tipo === 'Posts') tipoEl.className = 'inline-block mt-1.5 px-2 py-0.5 rounded-md font-bold text-[10px] bg-green-50 text-green-700 border border-green-100';
+            else tipoEl.className = 'inline-block mt-1.5 px-2 py-0.5 rounded-md font-bold text-[10px] bg-gray-50 text-gray-700 border border-gray-100';
+
+            toggleIdeaDrawer(true);
         }
 
         async function deletarIdeia(id) {
             if (confirm("Deseja apagar esta ideia permanentemente?")) {
                 const { error } = await crmBanco.from('ideias').delete().eq('id', id);
                 if (error) alert("Erro ao deletar: " + error.message);
-                else sincronizarIdeias();
+                else {
+                    toggleIdeaDrawer(false);
+                    sincronizarIdeias();
+                }
             }
         }
 
@@ -653,6 +764,7 @@
             
             editingIdeaId = ideia.id;
             document.getElementById('edit-idea-title').value = ideia.titulo;
+            document.getElementById('edit-idea-type').value = ideia.tipo || 'Reels';
             document.getElementById('edit-idea-desc').value = ideia.descricao;
             
             const modal = document.getElementById('edit-idea-modal');
@@ -675,13 +787,17 @@
             if (!editingIdeaId) return;
 
             const titulo = document.getElementById('edit-idea-title').value.trim();
+            const tipo = document.getElementById('edit-idea-type').value;
             const descricao = document.getElementById('edit-idea-desc').value.trim();
 
-            const { error } = await crmBanco.from('ideias').update({ titulo, descricao }).eq('id', editingIdeaId);
+            const { error } = await crmBanco.from('ideias').update({ titulo, tipo, descricao }).eq('id', editingIdeaId);
             if (error) alert("Erro na atualização da ideia: " + error.message);
-            else { fecharModalEdicaoIdeia(); sincronizarIdeias(); }
+            else { 
+                fecharModalEdicaoIdeia(); 
+                toggleIdeaDrawer(false);
+                sincronizarIdeias(); 
+            }
         });
-        // ----------------------------------------------
 
         // Relatórios Dinâmicos
         ['filter-start', 'filter-end', 'filter-assignee', 'filter-status'].forEach(id => {
