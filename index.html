@@ -332,122 +332,122 @@
     </div>
 
     <script>
-        // CONFIGURAÇÕES DO BANCO DE DADOS [cite: 68]
-        const SUPABASE_URL = "https://gsfudqnpcvabzxmhhdtk.supabase.co"; [cite: 68]
-        const SUPABASE_ANON_KEY = "sb_publishable_twXP0o4wO7lPf62lvBUbGw_E035byKS"; [cite: 69]
+        // CONFIGURAÇÕES DO BANCO DE DADOS
+        const SUPABASE_URL = "https://gsfudqnpcvabzxmhhdtk.supabase.co";
+        const SUPABASE_ANON_KEY = "sb_publishable_twXP0o4wO7lPf62lvBUbGw_E035byKS";
 
-        const crmBanco = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); [cite: 69]
+        const crmBanco = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let todasAtividades = []; [cite: 69]
+        let todasAtividades = [];
         let todasIdeias = [];
-        let fullCalendarInstance = null; [cite: 69]
-        let chartInstance = null; [cite: 70]
-        let editingTaskId = null; [cite: 70]
+        let fullCalendarInstance = null;
+        let chartInstance = null;
+        let editingTaskId = null;
 
-        // CONTROLE DO MENU MOBILE [cite: 70]
-        function toggleSidebar() { [cite: 70]
-            const sidebar = document.getElementById('main-sidebar'); [cite: 70]
-            const overlay = document.getElementById('sidebar-overlay'); [cite: 71]
+        // CONTROLE DO MENU MOBILE
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
             
-            sidebar.classList.toggle('-translate-x-full'); [cite: 71]
-            if(sidebar.classList.contains('-translate-x-full')) { [cite: 72]
-                overlay.classList.add('hidden'); [cite: 72]
-            } else { [cite: 73]
-                overlay.classList.remove('hidden'); [cite: 73]
+            sidebar.classList.toggle('-translate-x-full');
+            if(sidebar.classList.contains('-translate-x-full')) {
+                overlay.classList.add('hidden');
+            } else {
+                overlay.classList.remove('hidden');
             }
         }
 
-        // Monitoria de Autenticação [cite: 74]
-        crmBanco.auth.onAuthStateChange((event, session) => { [cite: 74]
-            if (event === "PASSWORD_RECOVERY") { [cite: 74]
-                const novaSenha = prompt("Crie a sua nova senha de acesso:"); [cite: 74]
-                if (novaSenha) { [cite: 74]
-                    crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => { [cite: 75]
-                        if (error) alert("Erro ao atualizar senha: " + error.message); [cite: 75]
-                        else alert("Senha atualizada com sucesso! Por favor, faça o login com a nova senha."); [cite: 75]
-                    }); [cite: 76]
+        // Monitoria de Autenticação
+        crmBanco.auth.onAuthStateChange((event, session) => {
+            if (event === "PASSWORD_RECOVERY") {
+                const novaSenha = prompt("Crie a sua nova senha de acesso:");
+                if (novaSenha) {
+                    crmBanco.auth.updateUser({ password: novaSenha }).then(({ error }) => {
+                        if (error) alert("Erro ao atualizar senha: " + error.message);
+                        else alert("Senha atualizada com sucesso! Por favor, faça o login com a nova senha.");
+                    });
                 }
             }
 
-            const app = document.getElementById('app-screen'); [cite: 76]
-            if (session && event !== "PASSWORD_RECOVERY") { [cite: 76]
-                document.getElementById('login-screen').classList.add('hidden'); [cite: 76]
-                app.classList.remove('hidden'); [cite: 77]
-                app.classList.add('flex'); [cite: 77]
-                setTimeout(() => app.classList.remove('opacity-0'), 50); [cite: 77]
-                document.getElementById('user-display').innerText = `CONECTADO: ${session.user.email}`; [cite: 78]
+            const app = document.getElementById('app-screen');
+            if (session && event !== "PASSWORD_RECOVERY") {
+                document.getElementById('login-screen').classList.add('hidden');
+                app.classList.remove('hidden');
+                app.classList.add('flex');
+                setTimeout(() => app.classList.remove('opacity-0'), 50);
+                document.getElementById('user-display').innerText = `CONECTADO: ${session.user.email}`;
                 sincronizarDados();
                 sincronizarIdeias();
-            } else { [cite: 78]
-                document.getElementById('login-screen').classList.remove('hidden'); [cite: 78]
-                app.classList.add('hidden', 'opacity-0'); [cite: 79]
-                app.classList.remove('flex'); [cite: 79]
+            } else {
+                document.getElementById('login-screen').classList.remove('hidden');
+                app.classList.add('hidden', 'opacity-0');
+                app.classList.remove('flex');
             }
-        }); [cite: 79]
+        });
 
-        // Formulário Login [cite: 80]
-        document.getElementById('login-form').addEventListener('submit', async (e) => { [cite: 80]
-            e.preventDefault(); [cite: 80]
-            const email = document.getElementById('login-email').value.trim(); [cite: 80]
-            const password = document.getElementById('login-password').value; [cite: 80]
+        // Formulário Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
             
-            if(!password) { alert("Digite a senha para entrar."); return; } [cite: 80]
+            if(!password) { alert("Digite a senha para entrar."); return; }
 
-            const { error } = await crmBanco.auth.signInWithPassword({ email, password }); [cite: 81]
-            if (error) alert("Erro: " + error.message); [cite: 81]
-        }); [cite: 81]
+            const { error } = await crmBanco.auth.signInWithPassword({ email, password });
+            if (error) alert("Erro: " + error.message);
+        });
 
-        // RECUPERAÇÃO DE SENHA [cite: 82]
-        document.getElementById('btn-esqueci-senha').addEventListener('click', async () => { [cite: 82]
-            const email = document.getElementById('login-email').value.trim(); [cite: 82]
+        // RECUPERAÇÃO DE SENHA
+        document.getElementById('btn-esqueci-senha').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value.trim();
             
-            if (!email) { [cite: 82]
-                alert("Por favor, digite o seu e-mail no campo acima antes de clicar em 'Esqueci minha senha'."); [cite: 82]
-                return; [cite: 83]
+            if (!email) {
+                alert("Por favor, digite o seu e-mail no campo acima antes de clicar em 'Esqueci minha senha'.");
+                return;
             }
 
-            const { error } = await crmBanco.auth.resetPasswordForEmail(email, { [cite: 83]
-                redirectTo: window.location.origin,  [cite: 83]
-            }); [cite: 83]
+            const { error } = await crmBanco.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin, 
+            });
 
-            if (error) { [cite: 83]
-                alert("Erro ao solicitar redefinição: " + error.message); [cite: 84]
-            } else { [cite: 84]
-                alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada ou aba de spam."); [cite: 84]
+            if (error) {
+                alert("Erro ao solicitar redefinição: " + error.message);
+            } else {
+                alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada ou aba de spam.");
             }
-        }); [cite: 84]
+        });
 
-        document.getElementById('logout-btn').addEventListener('click', async () => { await crmBanco.auth.signOut(); }); [cite: 85]
+        document.getElementById('logout-btn').addEventListener('click', async () => { await crmBanco.auth.signOut(); });
 
-        // Controle do Sistema de Abas Animado [cite: 85]
-        function switchTab(tabName) { [cite: 85]
-            ['home', 'tasks', 'ideas', 'summary', 'calendar'].forEach(t => { [cite: 85]
-                document.getElementById(`tab-${t}`).classList.add('hidden'); [cite: 85]
-                document.getElementById(`btn-tab-${t}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5"; [cite: 85]
-            }); [cite: 86]
+        // Controle do Sistema de Abas Animado
+        function switchTab(tabName) {
+            ['home', 'tasks', 'ideas', 'summary', 'calendar'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-tab-${t}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5";
+            });
             
-            const targetTab = document.getElementById(`tab-${tabName}`); [cite: 86]
-            targetTab.classList.remove('hidden'); [cite: 86]
-            document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white"; [cite: 86]
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            targetTab.classList.remove('hidden');
+            document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white";
             
-            if(window.innerWidth < 768) { toggleSidebar(); } [cite: 87]
+            if(window.innerWidth < 768) { toggleSidebar(); }
 
-            if (tabName === 'calendar' && fullCalendarInstance) setTimeout(() => fullCalendarInstance.render(), 50); [cite: 88]
-            if (tabName === 'summary') processarFiltrosERelatorios(); [cite: 89]
+            if (tabName === 'calendar' && fullCalendarInstance) setTimeout(() => fullCalendarInstance.render(), 50);
+            if (tabName === 'summary') processarFiltrosERelatorios();
         }
 
-        // Criar Atividade [cite: 89]
-        document.getElementById('task-form').addEventListener('submit', async (e) => { [cite: 89]
-            e.preventDefault(); [cite: 89]
-            const cliente = document.getElementById('task-client').value; [cite: 89]
-            const descricao = document.getElementById('task-desc').value; [cite: 89]
-            const responsavel = document.getElementById('task-assignee').value; [cite: 89]
-            const data_limite = document.getElementById('task-deadline').value; [cite: 89]
+        // Criar Atividade
+        document.getElementById('task-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cliente = document.getElementById('task-client').value;
+            const descricao = document.getElementById('task-desc').value;
+            const responsavel = document.getElementById('task-assignee').value;
+            const data_limite = document.getElementById('task-deadline').value;
 
-            const { error } = await crmBanco.from('tarefas').insert([{ cliente, descricao, responsavel, data_limite, status: 'todo' }]); [cite: 90]
-            if (error) alert(error.message); [cite: 90]
-            else { document.getElementById('task-form').reset(); sincronizarDados(); } [cite: 90]
-        }); [cite: 90]
+            const { error } = await crmBanco.from('tarefas').insert([{ cliente, descricao, responsavel, data_limite, status: 'todo' }]);
+            if (error) alert(error.message);
+            else { document.getElementById('task-form').reset(); sincronizarDados(); }
+        });
 
         // INTERAÇÕES DO BANCO DE IDEIAS
         document.getElementById('idea-form').addEventListener('submit', async (e) => {
@@ -511,263 +511,263 @@
             }
         }
 
-        // Atualizar Status [cite: 91]
-        async function moverTarefa(id, novoStatus) { [cite: 91]
-            await crmBanco.from('tarefas').update({ status: novoStatus }).eq('id', id); [cite: 91]
-            sincronizarDados(); [cite: 92]
+        // Atualizar Status
+        async function moverTarefa(id, novoStatus) {
+            await crmBanco.from('tarefas').update({ status: novoStatus }).eq('id', id);
+            sincronizarDados();
         }
 
-        // Deletar Registro [cite: 92]
-        async function deletarTarefa(id) { [cite: 92]
-            if(confirm("Deseja apagar permanentemente?")) { [cite: 92]
-                await crmBanco.from('tarefas').delete().eq('id', id); [cite: 92]
-                sincronizarDados(); [cite: 93]
+        // Deletar Registro
+        async function deletarTarefa(id) {
+            if(confirm("Deseja apagar permanentemente?")) {
+                await crmBanco.from('tarefas').delete().eq('id', id);
+                sincronizarDados();
             }
         }
 
-        // --- SISTEMA INTERNO DE EDIÇÃO --- [cite: 93]
-        function abrirModalEdicao(id) { [cite: 93]
-            const tarefa = todasAtividades.find(t => t.id === id); [cite: 93]
-            if (!tarefa) return; [cite: 94]
+        // --- SISTEMA INTERNO DE EDIÇÃO ---
+        function abrirModalEdicao(id) {
+            const tarefa = todasAtividades.find(t => t.id === id);
+            if (!tarefa) return;
             
-            editingTaskId = tarefa.id; [cite: 94]
-            document.getElementById('edit-client').value = tarefa.cliente; [cite: 94]
-            document.getElementById('edit-desc').value = tarefa.descricao; [cite: 94]
-            document.getElementById('edit-assignee').value = tarefa.responsavel; [cite: 94]
-            document.getElementById('edit-deadline').value = tarefa.data_limite || ''; [cite: 94]
-            const modal = document.getElementById('edit-modal'); [cite: 95]
-            modal.classList.remove('hidden'); [cite: 95]
-            setTimeout(() => { [cite: 95]
-                modal.classList.remove('opacity-0'); [cite: 95]
-                modal.querySelector('.transform').classList.remove('scale-95'); [cite: 95]
-            }, 10); [cite: 95]
+            editingTaskId = tarefa.id;
+            document.getElementById('edit-client').value = tarefa.cliente;
+            document.getElementById('edit-desc').value = tarefa.descricao;
+            document.getElementById('edit-assignee').value = tarefa.responsavel;
+            document.getElementById('edit-deadline').value = tarefa.data_limite || '';
+            const modal = document.getElementById('edit-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 10);
         }
 
-        function fecharModalEdicao() { [cite: 96]
-            const modal = document.getElementById('edit-modal'); [cite: 96]
-            modal.classList.add('opacity-0'); [cite: 97]
-            modal.querySelector('.transform').classList.add('scale-95'); [cite: 97]
-            setTimeout(() => { modal.classList.add('hidden'); editingTaskId = null; }, 300); [cite: 97]
+        function fecharModalEdicao() {
+            const modal = document.getElementById('edit-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('.transform').classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); editingTaskId = null; }, 300);
         }
 
-        document.getElementById('edit-form').addEventListener('submit', async (e) => { [cite: 98]
-            e.preventDefault(); [cite: 98]
-            if (!editingTaskId) return; [cite: 98]
+        document.getElementById('edit-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!editingTaskId) return;
 
-            const cliente = document.getElementById('edit-client').value; [cite: 98]
-            const descricao = document.getElementById('edit-desc').value; [cite: 98]
-            const responsavel = document.getElementById('edit-assignee').value; [cite: 98]
-            const data_limite = document.getElementById('edit-deadline').value; [cite: 98]
+            const cliente = document.getElementById('edit-client').value;
+            const descricao = document.getElementById('edit-desc').value;
+            const responsavel = document.getElementById('edit-assignee').value;
+            const data_limite = document.getElementById('edit-deadline').value;
 
-            const { error } = await crmBanco.from('tarefas').update({ cliente, descricao, responsavel, data_limite }).eq('id', editingTaskId); [cite: 99]
+            const { error } = await crmBanco.from('tarefas').update({ cliente, descricao, responsavel, data_limite }).eq('id', editingTaskId);
             
-            if (error) alert("Erro na atualização: " + error.message); [cite: 99]
-            else { fecharModalEdicao(); sincronizarDados(); } [cite: 99]
-        }); [cite: 99]
+            if (error) alert("Erro na atualização: " + error.message);
+            else { fecharModalEdicao(); sincronizarDados(); }
+        });
 
-        // Sincronização de Dados de Tarefas [cite: 100]
-        async function sincronizarDados() { [cite: 100]
-            const { data, error } = await crmBanco.from('tarefas').select('*').order('data_limite', { ascending: true }); [cite: 100]
-            if (error) return; [cite: 101]
-            todasAtividades = data; [cite: 101]
+        // Sincronização de Dados de Tarefas
+        async function sincronizarDados() {
+            const { data, error } = await crmBanco.from('tarefas').select('*').order('data_limite', { ascending: true });
+            if (error) return;
+            todasAtividades = data;
 
-            renderizarPaginaInicial(); [cite: 101]
-            renderizarKanban(); [cite: 101]
-            processarFiltrosERelatorios(); [cite: 101]
-            renderizarCalendario(); [cite: 101]
+            renderizarPaginaInicial();
+            renderizarKanban();
+            processarFiltrosERelatorios();
+            renderizarCalendario();
         }
 
-        // Render: Home [cite: 102]
-        function renderizarPaginaInicial() { [cite: 102]
-            let cnt = { todo: 0, doing: 0, done: 0 }; [cite: 102]
-            todasAtividades.forEach(t => cnt[t.status]++); [cite: 103]
+        // Render: Home
+        function renderizarPaginaInicial() {
+            let cnt = { todo: 0, doing: 0, done: 0 };
+            todasAtividades.forEach(t => cnt[t.status]++);
 
-            document.getElementById('dash-total').innerText = todasAtividades.length; [cite: 103]
-            document.getElementById('dash-todo').innerText = cnt.todo; [cite: 103]
-            document.getElementById('dash-doing').innerText = cnt.doing; [cite: 103]
-            document.getElementById('dash-done').innerText = cnt.done; [cite: 103]
+            document.getElementById('dash-total').innerText = todasAtividades.length;
+            document.getElementById('dash-todo').innerText = cnt.todo;
+            document.getElementById('dash-doing').innerText = cnt.doing;
+            document.getElementById('dash-done').innerText = cnt.done;
 
-            const tbody = document.getElementById('dash-deadlines-table'); [cite: 103]
-            tbody.innerHTML = ''; [cite: 104]
+            const tbody = document.getElementById('dash-deadlines-table');
+            tbody.innerHTML = '';
             
-            todasAtividades.filter(t => t.status !== 'done').slice(0, 5).forEach(t => { [cite: 104]
-                const badge = t.status === 'todo' ? '🔴 Pendente' : '🟡 Em Andamento'; [cite: 104]
-                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo'; [cite: 104]
-                tbody.innerHTML += ` [cite: 104]
-                    <tr class="hover:bg-gray-50/50 transition-colors border-b border-gray-50"> [cite: 105]
-                        <td class="p-3 font-medium text-gray-800">${t.cliente}</td> [cite: 105]
-                        <td class="p-3 text-gray-500">${t.descricao}</td> [cite: 105]
-                        <td class="p-3 text-gray-500">👤 ${t.responsavel}</td> [cite: 105]
-                        <td class="p-3 font-mono font-medium text-red-500">${dt}</td> [cite: 106]
-                        <td class="p-3 text-[10px] whitespace-nowrap">${badge}</td> [cite: 106]
-                    </tr>`; [cite: 106]
+            todasAtividades.filter(t => t.status !== 'done').slice(0, 5).forEach(t => {
+                const badge = t.status === 'todo' ? '🔴 Pendente' : '🟡 Em Andamento';
+                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50/50 transition-colors border-b border-gray-50">
+                        <td class="p-3 font-medium text-gray-800">${t.cliente}</td>
+                        <td class="p-3 text-gray-500">${t.descricao}</td>
+                        <td class="p-3 text-gray-500">👤 ${t.responsavel}</td>
+                        <td class="p-3 font-mono font-medium text-red-500">${dt}</td>
+                        <td class="p-3 text-[10px] whitespace-nowrap">${badge}</td>
+                    </tr>`;
             });
         }
 
-        // Render: Kanban [cite: 107]
-        function renderizarKanban() { [cite: 107]
-            const cols = { todo: document.getElementById('col-todo'), doing: document.getElementById('col-doing'), done: document.getElementById('col-done') }; [cite: 107]
-            Object.values(cols).forEach(col => col.innerHTML = ''); [cite: 108]
-            let counts = { todo: 0, doing: 0, done: 0 }; [cite: 108]
-            todasAtividades.forEach(t => { [cite: 109]
-                counts[t.status]++; [cite: 109]
-                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo'; [cite: 109]
+        // Render: Kanban
+        function renderizarKanban() {
+            const cols = { todo: document.getElementById('col-todo'), doing: document.getElementById('col-doing'), done: document.getElementById('col-done') };
+            Object.values(cols).forEach(col => col.innerHTML = '');
+            let counts = { todo: 0, doing: 0, done: 0 };
+            todasAtividades.forEach(t => {
+                counts[t.status]++;
+                const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
                 
-                let controlButtons = ''; [cite: 109]
-                if (t.status === 'todo') { [cite: 109]
-                    controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer w-full md:w-auto mt-2 md:mt-0">Iniciar 👉</button></div>`; [cite: 110]
-                } else if (t.status === 'doing') { [cite: 110]
-                    controlButtons = ` [cite: 110]
-                        <div class="w-full flex flex-col md:flex-row justify-between items-center gap-2 mt-2 md:mt-0"> [cite: 111]
-                            <button onclick="moverTarefa(${t.id}, 'todo')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-red-500 px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer">👈 Retornar</button> [cite: 111]
-                            <button onclick="moverTarefa(${t.id}, 'done')" class="text-[10px] bg-green-600 text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-green-700 w-full md:w-auto transition-colors cursor-pointer">Concluir ✔️</button> [cite: 111]
-                        </div>`; [cite: 112]
-                } else if (t.status === 'done') { [cite: 113]
-                    controlButtons = `<div class="w-full flex justify-start"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-[#533ABF] px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer mt-2 md:mt-0">↺ Reabrir Demanda</button></div>`; [cite: 113]
-                } [cite: 114]
+                let controlButtons = '';
+                if (t.status === 'todo') {
+                    controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer w-full md:w-auto mt-2 md:mt-0">Iniciar 👉</button></div>`;
+                } else if (t.status === 'doing') {
+                    controlButtons = `
+                        <div class="w-full flex flex-col md:flex-row justify-between items-center gap-2 mt-2 md:mt-0">
+                            <button onclick="moverTarefa(${t.id}, 'todo')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-red-500 px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer">👈 Retornar</button>
+                            <button onclick="moverTarefa(${t.id}, 'done')" class="text-[10px] bg-green-600 text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-green-700 w-full md:w-auto transition-colors cursor-pointer">Concluir ✔️</button>
+                        </div>`;
+                } else if (t.status === 'done') {
+                    controlButtons = `<div class="w-full flex justify-start"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-[#533ABF] px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer mt-2 md:mt-0">↺ Reabrir Demanda</button></div>`;
+                }
 
-                cols[t.status].innerHTML += ` [cite: 114]
-                    <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md space-y-2.5"> [cite: 114]
-                        <div class="flex justify-between items-start"> [cite: 114]
-                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[200px] md:max-w-[140px]">${t.cliente}</h5> [cite: 115]
-                            <div class="flex gap-3 md:gap-2"> [cite: 115]
-                                <button onclick="abrirModalEdicao(${t.id})" class="text-gray-400 hover:text-[#533ABF] text-[12px] md:text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button> [cite: 115]
-                                <button onclick="deletarTarefa(${t.id})" class="text-gray-400 hover:text-red-500 text-[12px] md:text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button> [cite: 116]
-                            </div> [cite: 116]
-                        </div> [cite: 116]
-                        <p class="text-[11px] text-gray-500 line-clamp-2">${t.descricao}</p> [cite: 116]
-                        <div class="text-[9px] text-gray-400 font-medium border-b border-gray-50 pb-2">Prazo: <span class="font-mono text-gray-600">${dt}</span></div> [cite: 117]
-                        <div class="pt-1 flex flex-col gap-2"> [cite: 117]
-                            <div class="text-[10px] md:text-[9px] text-gray-500">👤 ${t.responsavel}</div> [cite: 117]
-                            ${controlButtons} [cite: 118]
-                        </div> [cite: 118]
-                    </div>`; [cite: 118]
-            }); [cite: 119]
+                cols[t.status].innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md space-y-2.5">
+                        <div class="flex justify-between items-start">
+                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[200px] md:max-w-[140px]">${t.cliente}</h5>
+                            <div class="flex gap-3 md:gap-2">
+                                <button onclick="abrirModalEdicao(${t.id})" class="text-gray-400 hover:text-[#533ABF] text-[12px] md:text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
+                                <button onclick="deletarTarefa(${t.id})" class="text-gray-400 hover:text-red-500 text-[12px] md:text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">${t.descricao}</p>
+                        <div class="text-[9px] text-gray-400 font-medium border-b border-gray-50 pb-2">Prazo: <span class="font-mono text-gray-600">${dt}</span></div>
+                        <div class="pt-1 flex flex-col gap-2">
+                            <div class="text-[10px] md:text-[9px] text-gray-500">👤 ${t.responsavel}</div>
+                            ${controlButtons}
+                        </div>
+                    </div>`;
+            });
 
-            document.getElementById('count-todo').innerText = counts.todo; [cite: 119]
-            document.getElementById('count-doing').innerText = counts.doing; [cite: 119]
-            document.getElementById('count-done').innerText = counts.done; [cite: 119]
+            document.getElementById('count-todo').innerText = counts.todo;
+            document.getElementById('count-doing').innerText = counts.doing;
+            document.getElementById('count-done').innerText = counts.done;
         }
 
-        // Relatórios Dinâmicos [cite: 120]
-        ['filter-start', 'filter-end', 'filter-assignee', 'filter-status'].forEach(id => { [cite: 120]
-            document.getElementById(id).addEventListener('input', processarFiltrosERelatorios); [cite: 120]
-        }); [cite: 120]
+        // Relatórios Dinâmicos
+        ['filter-start', 'filter-end', 'filter-assignee', 'filter-status'].forEach(id => {
+            document.getElementById(id).addEventListener('input', processarFiltrosERelatorios);
+        });
         
-        function processarFiltrosERelatorios() { [cite: 121]
-            const start = document.getElementById('filter-start').value; [cite: 121]
-            const end = document.getElementById('filter-end').value; [cite: 122]
-            const assignee = document.getElementById('filter-assignee').value.toLowerCase().trim(); [cite: 122]
-            const status = document.getElementById('filter-status').value; [cite: 122]
+        function processarFiltrosERelatorios() {
+            const start = document.getElementById('filter-start').value;
+            const end = document.getElementById('filter-end').value;
+            const assignee = document.getElementById('filter-assignee').value.toLowerCase().trim();
+            const status = document.getElementById('filter-status').value;
             
-            let filtered = todasAtividades.filter(t => { [cite: 123]
-                if (start && t.data_limite && t.data_limite < start) return false; [cite: 123]
-                if (end && t.data_limite && t.data_limite > end) return false; [cite: 123]
-                if (assignee && !t.responsavel.toLowerCase().includes(assignee)) return false; [cite: 123]
-                if (status !== 'all' && t.status !== status) return false; [cite: 123]
-                return true; [cite: 124]
-            }); [cite: 125]
+            let filtered = todasAtividades.filter(t => {
+                if (start && t.data_limite && t.data_limite < start) return false;
+                if (end && t.data_limite && t.data_limite > end) return false;
+                if (assignee && !t.responsavel.toLowerCase().includes(assignee)) return false;
+                if (status !== 'all' && t.status !== status) return false;
+                return true;
+            });
             
-            const list = document.getElementById('summary-list'); [cite: 125]
-            list.innerHTML = filtered.length === 0 ? '<p class="text-gray-400 text-xs italic py-4 text-center">Nenhum registro correspondente.</p>' : ''; [cite: 125]
-            let chData = { todo: 0, doing: 0, done: 0 }; [cite: 126]
+            const list = document.getElementById('summary-list');
+            list.innerHTML = filtered.length === 0 ? '<p class="text-gray-400 text-xs italic py-4 text-center">Nenhum registro correspondente.</p>' : '';
+            let chData = { todo: 0, doing: 0, done: 0 };
             
-            filtered.forEach(t => { [cite: 127]
-                chData[t.status]++; [cite: 127]
-                const badge = t.status === 'todo' ? 'bg-red-50 text-red-600' : t.status === 'doing' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600'; [cite: 127]
-                const txt = t.status === 'todo' ? 'Pendente' : t.status === 'doing' ? 'Em Andamento' : 'Concluído'; [cite: 127]
+            filtered.forEach(t => {
+                chData[t.status]++;
+                const badge = t.status === 'todo' ? 'bg-red-50 text-red-600' : t.status === 'doing' ? 'bg-yellow-50 text-yellow-600' : 'bg-green-50 text-green-600';
+                const txt = t.status === 'todo' ? 'Pendente' : t.status === 'doing' ? 'Em Andamento' : 'Concluído';
                 
-                list.innerHTML += ` [cite: 128]
-                    <div class="py-3 flex flex-col md:flex-row md:justify-between md:items-center text-xs gap-2"> [cite: 128]
-                        <div> [cite: 128]
-                            <p class="font-medium text-gray-800">${t.cliente} <span class="text-gray-400 font-normal hidden md:inline">- ${t.descricao}</span></p> [cite: 128]
-                            <p class="text-[10px] text-gray-400 mt-0.5">Responsável: ${t.responsavel}</p> [cite: 129]
-                        </div> [cite: 129]
-                        <span class="px-2 py-1 md:py-0.5 rounded-md font-medium text-[10px] md:text-[9px] w-max ${badge}">${txt}</span> [cite: 129]
-                    </div>`; [cite: 129]
-            }); [cite: 130]
+                list.innerHTML += `
+                    <div class="py-3 flex flex-col md:flex-row md:justify-between md:items-center text-xs gap-2">
+                        <div>
+                            <p class="font-medium text-gray-800">${t.cliente} <span class="text-gray-400 font-normal hidden md:inline">- ${t.descricao}</span></p>
+                            <p class="text-[10px] text-gray-400 mt-0.5">Responsável: ${t.responsavel}</p>
+                        </div>
+                        <span class="px-2 py-1 md:py-0.5 rounded-md font-medium text-[10px] md:text-[9px] w-max ${badge}">${txt}</span>
+                    </div>`;
+            });
 
-            if (chartInstance) chartInstance.destroy(); [cite: 130]
-            const ctx = document.getElementById('productivityChart').getContext('2d'); [cite: 130]
-            chartInstance = new Chart(ctx, { [cite: 131]
-                type: 'doughnut', [cite: 131]
-                data: { [cite: 131]
-                    labels: ['Pendente', 'Andamento', 'Concluído'], [cite: 131]
-                    datasets: [{ [cite: 131]
-                        data: [chData.todo, chData.doing, chData.done], [cite: 132]
-                        backgroundColor: ['#EF4444', '#F59E0B', '#10B981'], [cite: 132]
-                        borderWidth: 0 [cite: 132]
-                    }] [cite: 132]
-                }, [cite: 133]
-                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } [cite: 133]
-            }); [cite: 134]
+            if (chartInstance) chartInstance.destroy();
+            const ctx = document.getElementById('productivityChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Pendente', 'Andamento', 'Concluído'],
+                    datasets: [{
+                        data: [chData.todo, chData.doing, chData.done],
+                        backgroundColor: ['#EF4444', '#F59E0B', '#10B981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
+            });
         }
 
-        // Calendário Integrado [cite: 134]
-        document.getElementById('calendar-filter-user').addEventListener('input', renderizarCalendario); [cite: 134]
-        function renderizarCalendario() { [cite: 135]
-            const filterUser = document.getElementById('calendar-filter-user').value.toLowerCase().trim(); [cite: 135]
-            const calendarEl = document.getElementById('calendar-widget'); [cite: 136]
+        // Calendário Integrado
+        document.getElementById('calendar-filter-user').addEventListener('input', renderizarCalendario);
+        function renderizarCalendario() {
+            const filterUser = document.getElementById('calendar-filter-user').value.toLowerCase().trim();
+            const calendarEl = document.getElementById('calendar-widget');
             
-            const eventosMap = todasAtividades [cite: 136]
-                .filter(t => t.data_limite && (!filterUser || t.responsavel.toLowerCase().includes(filterUser))) [cite: 136]
-                .map(t => ({ [cite: 136]
-                    id: t.id, [cite: 136]
-                    title: `[${t.cliente}] ${t.descricao}`, [cite: 136]
-                    start: t.data_limite, [cite: 137]
-                    backgroundColor: t.status === 'todo' ? '#EF4444' : t.status === 'doing' ? '#F59E0B' : '#10B981', [cite: 137]
-                    borderColor: 'transparent', [cite: 137]
-                    extendedProps: { ...t } [cite: 137]
-                })); [cite: 138]
+            const eventosMap = todasAtividades
+                .filter(t => t.data_limite && (!filterUser || t.responsavel.toLowerCase().includes(filterUser)))
+                .map(t => ({
+                    id: t.id,
+                    title: `[${t.cliente}] ${t.descricao}`,
+                    start: t.data_limite,
+                    backgroundColor: t.status === 'todo' ? '#EF4444' : t.status === 'doing' ? '#F59E0B' : '#10B981',
+                    borderColor: 'transparent',
+                    extendedProps: { ...t }
+                }));
 
-            if (fullCalendarInstance) fullCalendarInstance.destroy(); [cite: 138]
+            if (fullCalendarInstance) fullCalendarInstance.destroy();
 
-            fullCalendarInstance = new FullCalendar.Calendar(calendarEl, { [cite: 138]
-                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth', [cite: 138]
-                locale: 'pt-br', [cite: 138]
-                headerToolbar: {  [cite: 138]
-                    left: 'prev,next',  [cite: 138]
-                    center: 'title',  [cite: 139]
-                    right: window.innerWidth < 768 ? '' : 'dayGridMonth,listMonth'  [cite: 139]
-                }, [cite: 139]
-                buttonText: { today: 'Hoje', list: 'Lista', month: 'Mês' }, [cite: 139]
-                events: eventosMap, [cite: 140]
-                eventClick: function(info) { abrirDetalhesNoDrawer(info.event.extendedProps); } [cite: 140]
-            }); [cite: 140]
-            fullCalendarInstance.render(); [cite: 141]
+            fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
+                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth',
+                locale: 'pt-br',
+                headerToolbar: { 
+                    left: 'prev,next', 
+                    center: 'title', 
+                    right: window.innerWidth < 768 ? '' : 'dayGridMonth,listMonth' 
+                },
+                buttonText: { today: 'Hoje', list: 'Lista', month: 'Mês' },
+                events: eventosMap,
+                eventClick: function(info) { abrirDetalhesNoDrawer(info.event.extendedProps); }
+            });
+            fullCalendarInstance.render();
         }
 
-        function toggleDrawer(open) { [cite: 141]
-            const drawer = document.getElementById('calendar-drawer'); [cite: 141]
-            if (open) drawer.classList.remove('translate-x-full'); [cite: 142]
-            else drawer.classList.add('translate-x-full'); [cite: 142]
+        function toggleDrawer(open) {
+            const drawer = document.getElementById('calendar-drawer');
+            if (open) drawer.classList.remove('translate-x-full');
+            else drawer.classList.add('translate-x-full');
         }
 
-        function abrirDetalhesNoDrawer(task) { [cite: 142]
-            document.getElementById('drawer-client').innerText = task.cliente; [cite: 142]
-            document.getElementById('drawer-desc').innerText = task.descricao; [cite: 143]
-            document.getElementById('drawer-assignee').innerText = `👤 ${task.responsavel}`; [cite: 143]
-            document.getElementById('drawer-deadline').innerText = task.data_limite ? task.data_limite.split('-').reverse().join('/') : 'Não definida'; [cite: 143]
+        function abrirDetalhesNoDrawer(task) {
+            document.getElementById('drawer-client').innerText = task.cliente;
+            document.getElementById('drawer-desc').innerText = task.descricao;
+            document.getElementById('drawer-assignee').innerText = `👤 ${task.responsavel}`;
+            document.getElementById('drawer-deadline').innerText = task.data_limite ? task.data_limite.split('-').reverse().join('/') : 'Não definida';
             
-            const statusEl = document.getElementById('drawer-status'); [cite: 143]
-            if (task.status === 'todo') { [cite: 144]
-                statusEl.innerText = '🔴 Pendente'; [cite: 144]
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700'; [cite: 145]
-            } else if (task.status === 'doing') { [cite: 146]
-                statusEl.innerText = '🟡 Em Andamento'; [cite: 146]
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700'; [cite: 147]
-            } else { [cite: 148]
-                statusEl.innerText = '🟢 Concluído'; [cite: 148]
-                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-700'; [cite: 149]
-            } [cite: 150]
-            toggleDrawer(true); [cite: 150]
+            const statusEl = document.getElementById('drawer-status');
+            if (task.status === 'todo') {
+                statusEl.innerText = '🔴 Pendente';
+                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700';
+            } else if (task.status === 'doing') {
+                statusEl.innerText = '🟡 Em Andamento';
+                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-yellow-50 text-yellow-700';
+            } else {
+                statusEl.innerText = '🟢 Concluído';
+                statusEl.className = 'inline-block mt-1 px-3 py-1 rounded-full text-[10px] font-bold bg-green-50 text-green-700';
+            }
+            toggleDrawer(true);
         }
 
-        window.addEventListener('resize', () => { [cite: 151]
-            if(!document.getElementById('tab-calendar').classList.contains('hidden')) { [cite: 151]
-                renderizarCalendario(); [cite: 151]
-            } [cite: 151]
-        }); [cite: 151]
+        window.addEventListener('resize', () => {
+            if(!document.getElementById('tab-calendar').classList.contains('hidden')) {
+                renderizarCalendario();
+            }
+        });
     </script>
 </body>
 </html>
