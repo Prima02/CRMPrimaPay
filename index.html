@@ -80,8 +80,8 @@
                     <button onclick="switchTab('tasks')" id="btn-tab-tasks" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
                         <span>📋</span> Tarefas
                     </button>
-                    <button onclick="switchTab('ideas')" id="btn-tab-ideas" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
-                        <span>💡</span> Ideias de Conteúdo
+                    <button onclick="switchTab('ideias')" id="btn-tab-ideias" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
+                        <span>💡</span> Ideias e Roteiros
                     </button>
                     <button onclick="switchTab('summary')" id="btn-tab-summary" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5">
                         <span>📊</span> Resumo de Dados
@@ -129,7 +129,8 @@
                         <table class="w-full text-xs text-left min-w-[500px]">
                             <thead class="bg-gray-50 text-gray-400 uppercase text-[10px] tracking-wider">
                                 <tr>
-                                    <th class="p-3 font-medium">Título</th> <th class="p-3 font-medium">Atividade</th>
+                                    <th class="p-3 font-medium">Cliente</th>
+                                    <th class="p-3 font-medium">Atividade</th>
                                     <th class="p-3 font-medium">Responsável</th>
                                     <th class="p-3 font-medium">Prazo Limite</th>
                                     <th class="p-3 font-medium">Situação</th>
@@ -151,7 +152,7 @@
                 <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100">
                     <form id="task-form" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                         <div>
-                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Título</label>
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Cliente / Empresa</label>
                             <input type="text" id="task-client" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
                         </div>
                         <div>
@@ -186,38 +187,27 @@
                 </section>
             </div>
 
-            <div id="tab-ideas" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 tab-animate">
+            <div id="tab-ideias" class="hidden p-4 md:p-8 space-y-6 md:space-y-8 tab-animate">
                 <div class="flex flex-col gap-1">
-                    <h2 class="text-xl font-bold text-gray-900">Ideias e Roteiros de Conteúdo</h2>
-                    <p class="text-xs text-gray-400">Repositório criativo para salvar links de referências, textos base e roteiros de publicações.</p>
+                    <h2 class="text-xl font-bold text-gray-900">Banco de Ideias e Referências</h2>
+                    <p class="text-xs text-gray-400">Insira roteiros, inspirações e múltiplos links empilhados (um por linha).</p>
                 </div>
                 
                 <section class="bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <form id="idea-form" class="flex flex-col gap-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Título da Ideia / Pauta</label>
-                                <input type="text" id="idea-title" required placeholder="Ex: Roteiro Reels Dicas Financeiras" class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Tipo de Material</label>
-                                <select id="idea-type" class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]">
-                                    <option value="Roteiro">📝 Texto / Roteiro / Rascunho</option>
-                                    <option value="Link">🔗 Link de Referência / Inspiração</option>
-                                </select>
-                            </div>
+                    <form id="ideia-form" class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Título / Tema da Ideia</label>
+                            <input type="text" id="ideia-title" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]" placeholder="Ex: Referências de Anúncios - nicho X">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Conteúdo (Cole o link ou digite o texto)</label>
-                            <textarea id="idea-content" required rows="3" placeholder="Insira aqui o link ou escreva a base do seu roteiro..." class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF] resize-y"></textarea>
+                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Conteúdo / Múltiplos Links (Cole um por linha)</label>
+                            <textarea id="ideia-content" rows="5" required class="mt-1.5 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50/50 text-xs focus:outline-none focus:border-[#533ABF]" placeholder="Cole seus links aqui, quebrando linha para cada um..."></textarea>
                         </div>
-                        <div class="flex justify-end">
-                            <button type="submit" class="bg-[#E424C8] text-[#FEFEFE] py-2.5 px-6 rounded-xl text-xs hover:bg-[#c918ae] active:scale-[0.98] font-semibold transition-all shadow-sm cursor-pointer">Guardar Ideia</button>
-                        </div>
+                        <button type="submit" class="bg-[#533ABF] text-[#FEFEFE] py-2 px-4 rounded-xl text-xs hover:bg-[#422e99] active:scale-[0.98] font-semibold transition-all shadow-sm cursor-pointer h-[38px]">Adicionar Ideia</button>
                     </form>
                 </section>
 
-                <section id="ideas-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="ideias-container">
                     </section>
             </div>
 
@@ -287,7 +277,7 @@
                         </div>
           
                         <div class="space-y-4 text-xs">
-                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Título</span><p id="drawer-client" class="text-sm font-semibold text-gray-800 mt-0.5"></p></div>
+                            <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Cliente / Empresa</span><p id="drawer-client" class="text-sm font-semibold text-gray-800 mt-0.5"></p></div>
                             <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Atividade</span><p id="drawer-desc" class="text-gray-600 mt-0.5"></p></div>
                             <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Responsável</span><p id="drawer-assignee" class="font-medium text-gray-700 mt-0.5"></p></div>
                             <div><span class="block text-[10px] font-bold text-gray-400 uppercase tracking-wide">Data Limite</span><p id="drawer-deadline" class="font-mono text-gray-700 mt-0.5"></p></div>
@@ -299,6 +289,7 @@
         </main>
     </div>
 
+   
     <div id="edit-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-[70] backdrop-blur-xs transition-opacity duration-300 opacity-0 p-4">
         <div class="bg-white p-5 md:p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300">
             <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
@@ -307,7 +298,7 @@
             </div>
             <form id="edit-form" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Título</label>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Cliente</label>
                     <input type="text" id="edit-client" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
                 </div>
                 <div>
@@ -330,6 +321,31 @@
         </div>
     </div>
 
+
+    <div id="edit-ideia-modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-[70] backdrop-blur-xs transition-opacity duration-300 opacity-0 p-4">
+        <div class="bg-white p-5 md:p-6 rounded-2xl shadow-2xl w-full max-w-md transform scale-95 transition-all duration-300">
+            <div class="flex justify-between items-center border-b border-gray-100 pb-3 mb-4">
+                <h3 class="font-bold text-sm text-gray-800">📝 Editar Conteúdo da Ideia</h3>
+                <button onclick="fecharModalEdicaoIdeia()" class="text-gray-400 hover:text-gray-600 font-bold cursor-pointer text-lg">✕</button>
+            </div>
+            <form id="edit-ideia-form" class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Título / Tema</label>
+                    <input type="text" id="edit-ideia-title" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400">Conteúdo / Links</label>
+                    <textarea id="edit-ideia-content" rows="6" required class="mt-1 block w-full rounded-xl border border-gray-200 p-2.5 bg-gray-50 text-xs focus:outline-none"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="fecharModalEdicaoIdeia()" class="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors w-full md:w-auto">Cancelar</button>
+                    <button type="submit" class="bg-[#533ABF] hover:bg-[#422e99] text-white px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors shadow-sm w-full md:w-auto">Salvar Alterações</button>
+                </div>
+          </form>
+        </div>
+    </div>
+
+
     <script>
         // CONFIGURAÇÕES DO BANCO DE DADOS
         const SUPABASE_URL = "https://gsfudqnpcvabzxmhhdtk.supabase.co";
@@ -338,12 +354,13 @@
         const crmBanco = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let todasAtividades = [];
-        let todasIdeias = []; // Novo Array para armazenar as ideias
+        let todasIdeias = []; // Armazena as ideias vindas do banco
         let fullCalendarInstance = null;
         let chartInstance = null;
         let editingTaskId = null;
+        let editingIdeiaId = null; // Armazena o ID da ideia que está sendo editada
 
-        // CONTROLE DO MENU MOBILE
+        // CONTROLE DO MENU MOBILE (Novo)
         function toggleSidebar() {
             const sidebar = document.getElementById('main-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -395,29 +412,37 @@
             if (error) alert("Erro: " + error.message);
         });
 
+        // RECUPERAÇÃO DE SENHA (ESQUECI MINHA SENHA)
         document.getElementById('btn-esqueci-senha').addEventListener('click', async () => {
             const email = document.getElementById('login-email').value.trim();
+            
             if (!email) {
                 alert("Por favor, digite o seu e-mail no campo acima antes de clicar em 'Esqueci minha senha'.");
                 return;
             }
-            const { error } = await crmBanco.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
-            if (error) alert("Erro ao solicitar redefinição: " + error.message);
-            else alert("E-mail de redefinição enviado com sucesso!");
+
+            const { error } = await crmBanco.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin, 
+            });
+
+            if (error) {
+                alert("Erro ao solicitar redefinição: " + error.message);
+            } else {
+                alert("E-mail de redefinição enviado com sucesso! Verifique a sua caixa de entrada ou aba de spam.");
+            }
         });
 
         document.getElementById('logout-btn').addEventListener('click', async () => { await crmBanco.auth.signOut(); });
 
-        // Controle do Sistema de Abas Animado (Atualizado com aba Ideas)
+        // Controle do Sistema de Abas Animado (ATUALIZADO COM 'IDEIAS')
         function switchTab(tabName) {
-            ['home', 'tasks', 'ideas', 'summary', 'calendar'].forEach(t => {
-                const docTab = document.getElementById(`tab-${t}`);
-                if(docTab) docTab.classList.add('hidden');
-                const btnTab = document.getElementById(`btn-tab-${t}`);
-                if(btnTab) btnTab.className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5";
+            ['home', 'tasks', 'ideias', 'summary', 'calendar'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-tab-${t}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm text-white/70 hover:text-white hover:bg-white/5";
             });
             
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const targetTab = document.getElementById(`tab-${tabName}`);
+            targetTab.classList.remove('hidden');
             document.getElementById(`btn-tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium transition-all duration-300 cursor-pointer text-left text-sm bg-[#E424C8] shadow-sm text-white";
 
             if(window.innerWidth < 768) { toggleSidebar(); }
@@ -426,7 +451,7 @@
             if (tabName === 'summary') processarFiltrosERelatorios();
         }
 
-        // Criar Atividade
+        // Criar Atividade (Tarefas)
         document.getElementById('task-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const cliente = document.getElementById('task-client').value;
@@ -439,11 +464,13 @@
             else { document.getElementById('task-form').reset(); sincronizarDados(); }
         });
 
+        // Atualizar Status
         async function moverTarefa(id, novoStatus) {
             await crmBanco.from('tarefas').update({ status: novoStatus }).eq('id', id);
             sincronizarDados();
         }
 
+        // Deletar Registro
         async function deletarTarefa(id) {
             if(confirm("Deseja apagar permanentemente?")) {
                 await crmBanco.from('tarefas').delete().eq('id', id);
@@ -451,30 +478,7 @@
             }
         }
 
-        // SISTEMA DE IDEIAS (Criação e Deleção)
-        document.getElementById('idea-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const titulo = document.getElementById('idea-title').value;
-            const tipo = document.getElementById('idea-type').value;
-            const conteudo = document.getElementById('idea-content').value;
-
-            const { error } = await crmBanco.from('ideias').insert([{ titulo, tipo, conteudo }]);
-            if (error) {
-                alert("Para usar esta aba, crie a tabela 'ideias' no painel SQL do Supabase. Erro: " + error.message);
-            } else { 
-                document.getElementById('idea-form').reset(); 
-                sincronizarDados(); 
-            }
-        });
-
-        async function deletarIdeia(id) {
-            if(confirm("Tem certeza que deseja remover esta ideia/roteiro?")) {
-                await crmBanco.from('ideias').delete().eq('id', id);
-                sincronizarDados();
-            }
-        }
-
-        // SISTEMA INTERNO DE EDIÇÃO (Tarefas)
+        // --- SISTEMA INTERNO DE EDIÇÃO DE TAREFAS ---
         function abrirModalEdicao(id) {
             const tarefa = todasAtividades.find(t => t.id === id);
             if (!tarefa) return;
@@ -514,21 +518,19 @@
             else { fecharModalEdicao(); sincronizarDados(); }
         });
 
-        // Sincronização Unificada
+
+        // Sincronização Geral (ATUALIZADA)
         async function sincronizarDados() {
-            // Busca Tarefas
             const { data, error } = await crmBanco.from('tarefas').select('*').order('data_limite', { ascending: true });
-            if (!error) todasAtividades = data;
-
-            // Busca Ideias (Com tratamento seguro caso a tabela ainda não exista)
-            const { data: dataIdeias, error: erroIdeias } = await crmBanco.from('ideias').select('*').order('id', { ascending: false });
-            if (!erroIdeias && dataIdeias) todasIdeias = dataIdeias;
-
-            renderizarPaginaInicial();
-            renderizarKanban();
-            renderizarIdeias();
-            processarFiltrosERelatorios();
-            renderizarCalendario();
+            if (!error) {
+                todasAtividades = data;
+                renderizarPaginaInicial();
+                renderizarKanban();
+                processarFiltrosERelatorios();
+                renderizarCalendario();
+            }
+            // Sincroniza também a tabela ideias
+            await sincronizarIdeias();
         }
 
         // Render: Home
@@ -558,72 +560,42 @@
             });
         }
 
-        // Render: Kanban Visual 2
+        // Render: Kanban
         function renderizarKanban() {
-            const cols = { 
-                todo: document.getElementById('col-todo'), 
-                doing: document.getElementById('col-doing'), 
-                done: document.getElementById('col-done') 
-            };
-            Object.values(cols).forEach(col => { if(col) col.innerHTML = ''; });
+            const cols = { todo: document.getElementById('col-todo'), doing: document.getElementById('col-doing'), done: document.getElementById('col-done') };
+            Object.values(cols).forEach(col => col.innerHTML = '');
             let counts = { todo: 0, doing: 0, done: 0 };
-
             todasAtividades.forEach(t => {
-                if (!cols[t.status]) return;
                 counts[t.status]++;
-                
                 const dt = t.data_limite ? t.data_limite.split('-').reverse().join('/') : 'Sem Prazo';
                 
                 let controlButtons = '';
                 if (t.status === 'todo') {
-                    controlButtons = `
-                        <button onclick="moverTarefa(${t.id}, 'doing')" 
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1 transition shadow-sm w-full md:w-auto justify-center cursor-pointer">
-                            Iniciar 👆
-                        </button>`;
+                     controlButtons = `<div class="w-full flex justify-end"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] bg-[#533ABF] text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-[#422e99] transition-colors cursor-pointer w-full md:w-auto mt-2 md:mt-0">Iniciar 👉</button></div>`;
                 } else if (t.status === 'doing') {
                     controlButtons = `
-                        <div class="flex items-center justify-between w-full gap-3">
-                            <button onclick="moverTarefa(${t.id}, 'todo')" 
-                                    class="text-yellow-600 hover:text-yellow-700 text-xs font-semibold flex items-center gap-1 transition cursor-pointer">
-                                👉 Retornar
-                            </button>
-                            <button onclick="moverTarefa(${t.id}, 'done')" 
-                                    class="bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1 transition shadow-sm cursor-pointer">
-                                Concluir ✓
-                            </button>
+                        <div class="w-full flex flex-col md:flex-row justify-between items-center gap-2 mt-2 md:mt-0">
+                            <button onclick="moverTarefa(${t.id}, 'todo')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-red-500 px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer">👈 Retornar</button>
+                            <button onclick="moverTarefa(${t.id}, 'done')" class="text-[10px] bg-green-600 text-white px-3 py-2 md:py-1 rounded-lg font-medium hover:bg-green-700 w-full md:w-auto transition-colors cursor-pointer">Concluir ✔️</button>
                         </div>`;
                 } else if (t.status === 'done') {
-                    controlButtons = `
-                        <button onclick="moverTarefa(${t.id}, 'doing')" 
-                                class="text-xs text-gray-400 hover:text-[#533ABF] transition-colors cursor-pointer flex items-center gap-1">
-                            ↺ Reabrir Demanda
-                        </button>`;
+                    controlButtons = `<div class="w-full flex justify-start"><button onclick="moverTarefa(${t.id}, 'doing')" class="text-[10px] text-gray-500 bg-gray-200 md:bg-transparent md:hover:text-[#533ABF] px-3 py-2 md:p-0 rounded-lg w-full md:w-auto transition-colors cursor-pointer mt-2 md:mt-0">↺ Reabrir Demanda</button></div>`;
                 }
 
                 cols[t.status].innerHTML += `
-                    <div class="bg-white p-5 rounded-xl shadow-sm mb-4 relative border border-gray-100 flex flex-col justify-between min-h-[170px] transform transition-all duration-300 hover:shadow-md">
-                        <div class="absolute top-4 right-4 flex gap-2 z-10">
-                            <button onclick="abrirModalEdicao(${t.id})" class="text-orange-400 hover:text-orange-600 transition text-xs cursor-pointer" title="Editar">✏️</button>
-                            <button onclick="deletarTarefa(${t.id})" class="text-gray-300 hover:text-red-500 transition text-xs font-bold cursor-pointer" title="Excluir">✕</button>
-                        </div>
-
-                        <div class="pr-12">
-                            <h5 class="font-bold text-gray-800 text-sm truncate" title="${t.cliente}">${t.cliente}</h5>
-                            <p class="text-xs text-gray-500 mt-1 line-clamp-2">${t.descricao || ''}</p>
-                        </div>
-
-                        <div class="mt-4 pt-3 border-t border-gray-50">
-                            <p class="text-[11px] text-gray-400 font-medium mb-2">Prazo: <span class="font-mono font-semibold text-gray-600">${dt}</span></p>
-                            
-                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-1">
-                                <span class="text-[11px] text-gray-600 font-medium flex items-center gap-1 truncate max-w-[120px]">
-                                    👤 ${t.responsavel || 'Sem responsável'}
-                                </span>
-                                <div class="flex justify-end items-center">
-                                    ${controlButtons}
-                                </div>
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 transform transition-all duration-300 hover:shadow-md space-y-2.5">
+                        <div class="flex justify-between items-start">
+                            <h5 class="font-semibold text-xs text-gray-800 truncate max-w-[200px] md:max-w-[140px]">${t.cliente}</h5>
+                            <div class="flex gap-3 md:gap-2">
+                                <button onclick="abrirModalEdicao(${t.id})" class="text-gray-400 hover:text-[#533ABF] text-[12px] md:text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
+                                <button onclick="deletarTarefa(${t.id})" class="text-gray-400 hover:text-red-500 text-[12px] md:text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
                             </div>
+                        </div>
+                        <p class="text-[11px] text-gray-500 line-clamp-2">${t.descricao}</p>
+                        <div class="text-[9px] text-gray-400 font-medium border-b border-gray-50 pb-2">Prazo: <span class="font-mono text-gray-600">${dt}</span></div>
+                        <div class="pt-1 flex flex-col gap-2">
+                            <div class="text-[10px] md:text-[9px] text-gray-500">👤 ${t.responsavel}</div>
+                            ${controlButtons}
                         </div>
                     </div>`;
             });
@@ -633,45 +605,10 @@
             document.getElementById('count-done').innerText = counts.done;
         }
 
-        // Render: Ideias
-        function renderizarIdeias() {
-            const grid = document.getElementById('ideas-grid');
-            if(!grid) return;
-            grid.innerHTML = '';
-            
-            if (todasIdeias.length === 0) {
-                grid.innerHTML = '<p class="text-xs text-gray-400 p-4 col-span-full">Nenhuma ideia adicionada ainda.</p>';
-                return;
-            }
-
-            todasIdeias.forEach(i => {
-                const isLink = i.tipo === 'Link' || i.conteudo.startsWith('http');
-                const contentHtml = isLink 
-                    ? `<a href="${i.conteudo}" target="_blank" class="text-[#E424C8] hover:underline break-all block mt-2 text-[11px]">${i.conteudo}</a>`
-                    : `<p class="whitespace-pre-wrap text-gray-500 text-[11px] mt-2">${i.conteudo}</p>`;
-                
-                grid.innerHTML += `
-                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col justify-start transform transition-all duration-300 hover:shadow-md relative group">
-                        <button onclick="deletarIdeia(${i.id})" class="absolute top-4 right-4 text-gray-300 hover:text-red-500 text-xs font-bold transition-colors cursor-pointer opacity-0 group-hover:opacity-100" title="Excluir">✕</button>
-                        
-                        <div class="pr-6">
-                            <span class="inline-block px-2 py-0.5 rounded text-[9px] font-bold mb-2 ${i.tipo === 'Link' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'}">${i.tipo}</span>
-                            <h5 class="font-bold text-gray-800 text-sm line-clamp-2">${i.titulo}</h5>
-                        </div>
-                        
-                        <div class="mt-2 pt-2 border-t border-gray-50 flex-1 overflow-y-auto max-h-[150px] custom-scrollbar">
-                            ${contentHtml}
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
         // Relatórios Dinâmicos
         ['filter-start', 'filter-end', 'filter-assignee', 'filter-status'].forEach(id => {
             document.getElementById(id).addEventListener('input', processarFiltrosERelatorios);
         });
-
         function processarFiltrosERelatorios() {
             const start = document.getElementById('filter-start').value;
             const end = document.getElementById('filter-end').value;
@@ -684,7 +621,6 @@
                 if (status !== 'all' && t.status !== status) return false;
                 return true;
             });
-
             const list = document.getElementById('summary-list');
             list.innerHTML = filtered.length === 0 ? '<p class="text-gray-400 text-xs italic py-4 text-center">Nenhum registro correspondente.</p>' : '';
             let chData = { todo: 0, doing: 0, done: 0 };
@@ -739,7 +675,7 @@
             if (fullCalendarInstance) fullCalendarInstance.destroy();
 
             fullCalendarInstance = new FullCalendar.Calendar(calendarEl, {
-                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth',
+                initialView: window.innerWidth < 768 ? 'listMonth' : 'dayGridMonth', 
                 locale: 'pt-br',
                 headerToolbar: { 
                     left: 'prev,next', 
@@ -782,6 +718,134 @@
         window.addEventListener('resize', () => {
             if(!document.getElementById('tab-calendar').classList.contains('hidden')) {
                 renderizarCalendario();
+            }
+        });
+
+
+        // ========================================================
+        // NOVO: LOGICA EXCLUSIVA PARA O GERENCIAMENTO DE IDEIAS
+        // ========================================================
+        
+        async function sincronizarIdeias() {
+            const { data, error } = await crmBanco.from('ideias').select('*').order('id', { ascending: false });
+            if (error) {
+                console.error("Erro ao buscar ideias:", error.message);
+                return;
+            }
+            todasIdeias = data;
+            renderizarIdeias();
+        }
+
+        function renderizarIdeias() {
+            const container = document.getElementById('ideias-container');
+            if (!container) return;
+            container.innerHTML = '';
+            
+            if (todasIdeias.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-xs italic col-span-full text-center py-4">Nenhuma ideia cadastrada ainda.</p>';
+                return;
+            }
+
+            todasIdeias.forEach(ideia => {
+                const conteudoFormatado = formatarConteudoIdeia(ideia.conteudo);
+                container.innerHTML += `
+                    <div class="bg-white p-4 rounded-xl shadow-xs border border-gray-100 space-y-3 flex flex-col justify-between hover:shadow-md transition-all">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h5 class="font-semibold text-xs text-gray-800 truncate pr-2">${ideia.titulo}</h5>
+                                <div class="flex gap-2 shrink-0">
+                                    <button onclick="abrirModalEdicaoIdeia(${ideia.id})" class="text-gray-400 hover:text-[#533ABF] text-[11px] transition-colors cursor-pointer" title="Editar">✏️</button>
+                                    <button onclick="deletarIdeia(${ideia.id})" class="text-gray-400 hover:text-red-500 text-[11px] font-bold transition-colors cursor-pointer" title="Excluir">✕</button>
+                                </div>
+                            </div>
+                            <div class="text-[11px] space-y-1 overflow-y-auto max-h-[160px] pr-1">
+                                ${conteudoFormatado}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        // Função mágica que empilha os links um abaixo do outro com o visual correto
+        function formatarConteudoIdeia(texto) {
+            if (!texto) return '';
+            return texto.split('\n').map(linha => {
+                const trimmed = linha.trim();
+                if (!trimmed) return '';
+                
+                const urlRegex = /(https?:\/\/[^\s]+)/g;
+                if (urlRegex.test(trimmed)) {
+                    return trimmed.replace(urlRegex, function(url) {
+                        return `<a href="${url}" target="_blank" class="text-blue-600 hover:text-blue-800 hover:underline block break-all mb-1.5 font-medium bg-blue-50/50 p-1.5 rounded-lg border border-blue-100/50">🔗 ${url}</a>`;
+                    });
+                }
+                return `<p class="text-gray-600 mb-1 break-words">${trimmed}</p>`;
+            }).join('');
+        }
+
+        // Envio do formulário de criação de ideias
+        document.getElementById('ideia-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById('ideia-title').value;
+            const conteudo = document.getElementById('ideia-content').value;
+
+            const { error } = await crmBanco.from('ideias').insert([{ titulo, conteudo }]);
+            if (error) {
+                alert("Erro ao salvar ideia: " + error.message);
+            } else {
+                document.getElementById('ideia-form').reset();
+                await sincronizarIdeias();
+            }
+        });
+
+        // Apagar Ideia
+        async function deletarIdeia(id) {
+            if(confirm("Deseja apagar esta ideia permanentemente?")) {
+                const { error } = await crmBanco.from('ideias').delete().eq('id', id);
+                if (error) alert("Erro ao deletar: " + error.message);
+                else await sincronizarIdeias();
+            }
+        }
+
+        // Controle da Janela Modal de Edição de Ideias
+        function abrirModalEdicaoIdeia(id) {
+            const ideia = todasIdeias.find(i => i.id === id);
+            if (!ideia) return;
+            
+            editingIdeiaId = ideia.id;
+            document.getElementById('edit-ideia-title').value = ideia.titulo;
+            document.getElementById('edit-ideia-content').value = ideia.conteudo;
+            
+            const modal = document.getElementById('edit-ideia-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.transform').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function fecharModalEdicaoIdeia() {
+            const modal = document.getElementById('edit-ideia-modal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('.transform').classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); editingIdeiaId = null; }, 300);
+        }
+
+        // Salvar Alterações da Ideia Editada
+        document.getElementById('edit-ideia-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!editingIdeiaId) return;
+
+            const titulo = document.getElementById('edit-ideia-title').value;
+            const conteudo = document.getElementById('edit-ideia-content').value;
+
+            const { error } = await crmBanco.from('ideias').update({ titulo, conteudo }).eq('id', editingIdeiaId);
+            
+            if (error) {
+                alert("Erro na atualização da ideia: " + error.message);
+            } else {
+                fecharModalEdicaoIdeia();
+                await sincronizarIdeias();
             }
         });
     </script>
